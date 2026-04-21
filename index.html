@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>ERP Menu - Deep Search & Highlight</title>
+    <style>
+        body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; display: flex; height: 100vh; background: #f0f2f5; }
+        
+        /* Layout */
+        .input-panel { width: 30%; padding: 20px; background: #2c3e50; color: white; display: flex; flex-direction: column; }
+        .output-panel { width: 70%; padding: 20px; overflow-y: auto; }
+        
+        textarea { flex: 1; margin-top: 10px; font-family: 'Consolas', monospace; padding: 12px; border: none; font-size: 13px; outline: none; border-radius: 4px; }
+        button { margin-top: 15px; padding: 12px; background: #e67e22; color: white; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; }
+
+        /* Search Box */
+        .search-container { margin-bottom: 15px; }
+        #menuSearch { width: 100%; padding: 12px 20px; font-size: 15px; border: 2px solid #b32d2e; border-radius: 4px; outline: none; box-sizing: border-box; font-weight: 500; }
+
+        /* Menu Container */
+        .menu-wrapper { background: white; border: 1px solid #d1d1d1; padding: 10px 20px; min-height: 500px; border-radius: 4px; }
+        ul { list-style: none; padding-left: 25px; margin: 0; }
+        li { margin: 0; padding: 0; }
+        .root-ul { padding-left: 0; }
+        
+        .menu-row { display: flex; align-items: center; padding: 6px 5px; cursor: pointer; font-size: 15px; line-height: 1.2; border-radius: 4px; }
+        .menu-row:hover { background: #f1f2f6; }
+
+        /* Bôi sáng mục tìm được */
+        mark { background: #ffeb3b; color: #000; padding: 0; font-weight: bold; }
+        .row-active { background: #fffde7; border-left: 3px solid #fbc02d; }
+
+        /* Phân cấp màu sắc */
+        .lvl-1 { color: #b32d2e; font-weight: bold; border-bottom: 1px solid #eee; margin-top: 4px; }
+        .lvl-2 { color: #1a237e; font-weight: 600; }
+        .lvl-3 { color: #000000; font-style: italic; font-weight: normal; }
+
+        /* Icons */
+        .toggle-box { 
+            width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; 
+            margin-right: 12px; border: 1px solid #777; background: #fff; flex-shrink: 0; user-select: none;
+        }
+        .toggle-txt { font-size: 17px; font-weight: bold; color: #333; }
+        .icon-diamond { font-size: 16px; margin-right: 10px; width: 20px; flex-shrink: 0; text-align: center; }
+
+        .hidden { display: none; }
+        .force-show { display: block !important; }
+    </style>
+</head>
+<body>
+
+<div class="input-panel">
+    <h2>1. Nhập Dữ Liệu</h2>
+    <textarea id="rawInput" placeholder="++ Cấp 1&#10;+ Cấp 2&#10;Chi tiết cấp 3"></textarea>
+    <button onclick="renderERP()">CẬP NHẬT MENU ◈</button>
+</div>
+
+<div class="output-panel">
+    <div class="search-container">
+        <input type="text" id="menuSearch" placeholder="🔍 Tìm kiếm menu chi tiết..." onkeyup="searchMenu()">
+    </div>
+    <div class="menu-wrapper" id="menuResult">
+        <p style="color: #999; text-align: center; margin-top: 50px;">Dán dữ liệu và nhấn cập nhật.</p>
+    </div>
+</div>
+
+<script>
+    let originalData = []; // Lưu trữ dữ liệu gốc để render lại khi cần
+
+    function renderERP() {
+        const text = document.getElementById('rawInput').value;
+        const container = document.getElementById('menuResult');
+        container.innerHTML = "";
+        if (!text.trim()) return;
+
+        const lines = text.split('\n').filter(l => l.trim() !== "");
+        const tree = [];
+        let last1 = null, last2 = null;
+
+        lines.forEach(line => {
+            const clean = line.trim();
+            if (clean.startsWith('++')) {
+                const node = { title: clean.replace('++', '').trim(), level: 1, children: [] };
+                tree.push(node); last1 = node; last2 = null;
+            } else if (clean.startsWith('+')) {
+                const node = { title: clean.replace('+', '').trim(), level: 2, children: [] };
+                if (last1) last1.children.push(node); else tree.push(node);
+                last2 = node;
+            } else {
+                const node = { title: clean, level: 3, children: [] };
+                if (last2) last2.children.push(node);
+                else if (last1) last1.children.push(node);
+                else tree.push(node);
+            }
+        });
+        originalData = tree;
+        draw(tree, container, true);
+    }
+
+    function draw(nodes, parent, isRoot = false) {
+        const ul = document.createElement('ul');
+        if (isRoot) ul.className = 'root-ul';
+
+        nodes.forEach(node => {
+            const li = document.createElement('li');
+            const hasChildren = node.children.length > 0;
+            const row = document.createElement('div');
+            row.className = `menu-row lvl-${node.level}`;
+            
+            let toggleSection = hasChildren 
+                ? `<span class="toggle-box"><span class="toggle-txt">+</span></span>`
+                : `<span style="width:20px; margin-right:12px; display:inline-block;"></span>`;
+            
+            row.innerHTML = `${toggleSection}<span class="icon-diamond">◈</span><span class="txt-label">${node.title}</span>`;
+            li.appendChild(row);
+
+            if (hasChildren) {
+                const subUl = document.createElement('ul');
+                subUl.className = 'hidden';
+                draw(node.children, subUl);
+                li.appendChild(subUl);
+
+                row.onclick = (e) => {
+                    const isHidden = subUl.classList.toggle('hidden');
+                    const txt = row.querySelector('.toggle-txt');
+                    if (txt) txt.textContent = isHidden ? '+' : '-';
+                    e.stopPropagation();
+                };
+            }
+            ul.appendChild(li);
+        });
+        parent.appendChild(ul);
+    }
+
+    function searchMenu() {
+        const keyword = document.getElementById('menuSearch').value.toLowerCase().trim();
+        const allLi = document.querySelectorAll('#menuResult li');
+        const allSubUl = document.querySelectorAll('#menuResult ul:not(.root-ul)');
+        const allRows = document.querySelectorAll('.menu-row');
+
+        // Reset
+        allRows.forEach(row => {
+            row.classList.remove('row-active');
+            const label = row.querySelector('.txt-label');
+            label.innerHTML = label.textContent; // Xóa thẻ mark cũ
+        });
+
+        if (keyword === "") {
+            allSubUl.forEach(ul => ul.classList.add('hidden'));
+            document.querySelectorAll('.toggle-txt').forEach(t => t.textContent = '+');
+            return;
+        }
+
+        allLi.forEach(li => {
+            const labelSpan = li.querySelector('.txt-label');
+            const originalText = labelSpan.textContent;
+            const row = li.querySelector('.menu-row');
+
+            if (originalText.toLowerCase().includes(keyword)) {
+                // 1. Bôi sáng chữ
+                const regex = new RegExp(`(${keyword})`, 'gi');
+                labelSpan.innerHTML = originalText.replace(regex, '<mark>$1</mark>');
+                
+                // 2. Bôi sáng cả dòng
+                row.classList.add('row-active');
+
+                // 3. Tự động bung các cấp cha
+                let p = li.parentElement; // ul chứa li này
+                while (p && p.id !== 'menuResult') {
+                    p.classList.remove('hidden'); // Mở thư mục
+                    
+                    // Cập nhật dấu + thành - cho thẻ cha tương ứng
+                    const parentRow = p.parentElement.querySelector('.menu-row');
+                    if (parentRow) {
+                        const txt = parentRow.querySelector('.toggle-txt');
+                        if (txt) txt.textContent = '-';
+                    }
+                    p = p.parentElement.parentElement; // Nhảy lên ul cấp trên
+                }
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
