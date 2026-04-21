@@ -2,57 +2,51 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>ERP Menu - Dũng Tech</title>
+    <title>ERP Menu Search</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; display: flex; height: 100vh; background: #f0f2f5; }
+        body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; background: #f0f2f5; display: flex; flex-direction: column; height: 100vh; }
         
-        /* Layout */
-        .input-panel { width: 30%; padding: 20px; background: #2c3e50; color: white; display: flex; flex-direction: column; }
-        .output-panel { width: 70%; padding: 20px; overflow-y: auto; }
+        /* Cấu trúc bảng nhập - Mặc định ẩn hoàn toàn */
+        .input-panel { display: none; position: fixed; left: 0; top: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.95); z-index: 1000; padding: 20px; flex-direction: column; box-sizing: border-box; }
+        .input-panel.active { display: flex; }
         
-        textarea { flex: 1; margin-top: 10px; font-family: 'Consolas', monospace; padding: 12px; border: none; font-size: 13px; outline: none; border-radius: 4px; color: #333; }
-        button { margin-top: 15px; padding: 12px; background: #e67e22; color: white; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; }
-        button:hover { background: #d35400; }
+        textarea { flex: 1; margin-top: 10px; font-family: 'Consolas', monospace; padding: 12px; font-size: 13px; border-radius: 4px; border: none; }
+        
+        /* Giao diện Menu chính - Chiếm 100% màn hình */
+        .output-panel { width: 100%; padding: 20px; overflow-y: auto; box-sizing: border-box; }
+        
+        .search-container { position: sticky; top: 0; background: #f0f2f5; z-index: 10; padding-bottom: 15px; display: flex; gap: 10px; }
+        #menuSearch { flex: 1; padding: 12px 20px; font-size: 16px; border: 2px solid #b32d2e; border-radius: 8px; outline: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 
-        /* Search Box */
-        .search-container { margin-bottom: 15px; position: sticky; top: 0; background: #f0f2f5; z-index: 10; padding-bottom: 10px; }
-        #menuSearch { width: 100%; padding: 12px 20px; font-size: 15px; border: 2px solid #b32d2e; border-radius: 4px; outline: none; box-sizing: border-box; font-weight: 500; }
+        /* Nút ẩn/hiện bảng nhập (Thiết kế tinh tế) */
+        .btn-setup { padding: 10px; background: #95a5a6; color: white; border: none; border-radius: 8px; cursor: pointer; opacity: 0.6; }
+        .btn-save { margin-top: 15px; padding: 15px; background: #e67e22; color: white; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; }
 
-        /* Menu Container */
-        .menu-wrapper { background: white; border: 1px solid #d1d1d1; padding: 10px 20px; min-height: 500px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        ul { list-style: none; padding-left: 25px; margin: 0; }
-        li { margin: 0; padding: 0; }
+        /* Menu Styles */
+        .menu-wrapper { background: white; border: 1px solid #d1d1d1; padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        ul { list-style: none; padding-left: 20px; margin: 0; }
         .root-ul { padding-left: 0; }
-        
-        .menu-row { display: flex; align-items: center; padding: 6px 5px; cursor: pointer; font-size: 15px; line-height: 1.2; border-radius: 4px; transition: 0.2s; }
+        .menu-row { display: flex; align-items: center; padding: 3px 5px; cursor: pointer; border-radius: 4px; transition: 0.2s; border-bottom: 1px solid #f9f9f9; }
         .menu-row:hover { background: #f1f2f6; }
+        
+        /* Màu sắc phân cấp */
+        .lvl-1 { color: #b32d2e; font-weight: bold; font-size: 17px; margin-top: 15px; }
+        .lvl-2 { color: #1a237e; font-weight: 600; font-size: 15px; }
+        .lvl-3 { color: #333; font-size: 14px; }
 
-        /* Bôi sáng mục tìm được */
-        mark { background: #ffeb3b; color: #000; padding: 0; font-weight: bold; }
-        .row-active { background: #fffde7; border-left: 4px solid #fbc02d; }
-
-        /* Phân cấp màu sắc */
-        .lvl-1 { color: #b32d2e; font-weight: bold; border-bottom: 1px solid #eee; margin-top: 10px; font-size: 16px; }
-        .lvl-2 { color: #1a237e; font-weight: 600; margin-top: 5px; }
-        .lvl-3 { color: #333; font-style: normal; font-weight: normal; padding-left: 10px; }
-
-        /* Icons */
-        .toggle-box { 
-            width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; 
-            margin-right: 12px; border: 1px solid #777; background: #fff; flex-shrink: 0; user-select: none; border-radius: 2px;
-        }
-        .toggle-txt { font-size: 14px; font-weight: bold; color: #333; line-height: 1; }
-        .icon-diamond { font-size: 14px; margin-right: 10px; width: 20px; flex-shrink: 0; text-align: center; color: #7f8c8d; }
-
+        .toggle-box { width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px; border: 1px solid #ccc; background: #fff; font-weight: bold; border-radius: 3px; }
+        mark { background: #ffeb3b; font-weight: bold; }
+        .row-active { background: #fffde7; border-left: 5px solid #fbc02d; }
         .hidden { display: none; }
     </style>
 </head>
 <body>
 
-<div class="input-panel">
-    <h2>1. Nhập Dữ Liệu</h2>
-    <p style="font-size: 12px; color: #bdc3c7;">Dán menu (786 dòng) vào đây. Sử dụng ++ cho Cấp 1, + cho Cấp 2.</p>
-    <textarea id="rawInput" placeholder="Nhập dữ liệu tại đây...">
+<div class="input-panel" id="inputPanel">
+    <h2 style="color: white; margin: 0;">Cập nhật Menu ERP</h2>
+    <p style="color: #bdc3c7;">Dán dữ liệu vào đây (Sử dụng ++ cho Cấp 1, + cho Cấp 2)</p>
+    <textarea id="rawInput" placeholder="Dán 786 dòng vào đây...">
 ++	系统管理SM - Quản lý hệ thống (SM)	--Xìtǒng guǎnlǐ SM
 	菜单管理 - Quản lý Menu	--Càidān guǎnlǐ
 	文件管理 - Quản lý Tập tin	--Wénjiàn guǎnlǐ
@@ -832,36 +826,47 @@
 	订单产量能耗查询 - Truy vấn tiêu hao năng lượng và sản lượng theo đơn hàng	--Dìngdān chǎnliàng nénghào cháxún
 	设备班组产能耗用对比 - So sánh tiêu hao năng suất theo tổ nhóm thiết bị	--Shèbèi bānzǔ chǎnnéng hàoyòng duìbǐ
 	设备能耗用量查询 - Truy vấn lượng tiêu hao năng lượng thiết bị	--Shèbèi nénghào yòngliàng cháxún
+
     </textarea>
-    <button onclick="renderERP()">CẬP NHẬT & LƯU MENU ◈</button>
+    <div style="display: flex; gap: 10px;">
+        <button class="btn-save" style="flex: 1;" onclick="saveAndRender()">LƯU VÀ HIỂN THỊ ◈</button>
+        <button class="btn-save" style="background: #95a5a6;" onclick="toggleInput()">HỦY</button>
+    </div>
 </div>
 
 <div class="output-panel">
     <div class="search-container">
-        <input type="text" id="menuSearch" placeholder="🔍 Nhập từ khóa để tìm kiếm và tự động bung menu..." onkeyup="searchMenu()">
+        <input type="text" id="menuSearch" placeholder="🔍 Nhập từ khóa tìm menu..." onkeyup="searchMenu()">
+        <button class="btn-setup" onclick="toggleInput()" title="Cài đặt dữ liệu">⚙️</button>
     </div>
     <div class="menu-wrapper" id="menuResult">
         </div>
 </div>
 
 <script>
-    // 1. TỰ ĐỘNG CHẠY KHI MỞ FILE
+    // 1. Tự động load khi mở trang
     window.onload = function() {
-        // Kiểm tra xem trình duyệt có lưu dữ liệu cũ không
-        const savedData = localStorage.getItem('erp_dung_tech_data');
+        const savedData = localStorage.getItem('erp_final_data');
         if (savedData) {
             document.getElementById('rawInput').value = savedData;
         }
-        renderERP(); // Tự động dựng menu
+        renderMenu();
     };
 
-    function renderERP() {
+    function toggleInput() {
+        document.getElementById('inputPanel').classList.toggle('active');
+    }
+
+    function saveAndRender() {
+        const data = document.getElementById('rawInput').value;
+        localStorage.setItem('erp_final_data', data); // Lưu vào máy
+        renderMenu();
+        toggleInput(); // Ẩn bảng nhập sau khi lưu
+    }
+
+    function renderMenu() {
         const text = document.getElementById('rawInput').value;
         const container = document.getElementById('menuResult');
-        
-        // 2. LƯU VÀO BỘ NHỚ TRÌNH DUYỆT (Để không bị mất khi F5)
-        localStorage.setItem('erp_dung_tech_data', text);
-        
         container.innerHTML = "";
         if (!text.trim()) return;
 
@@ -891,30 +896,22 @@
     function draw(nodes, parent, isRoot = false) {
         const ul = document.createElement('ul');
         if (isRoot) ul.className = 'root-ul';
-
         nodes.forEach(node => {
             const li = document.createElement('li');
             const hasChildren = node.children.length > 0;
             const row = document.createElement('div');
             row.className = `menu-row lvl-${node.level}`;
-            
-            let toggleSection = hasChildren 
-                ? `<span class="toggle-box"><span class="toggle-txt">+</span></span>`
-                : `<span style="width:18px; margin-right:12px; display:inline-block;"></span>`;
-            
-            row.innerHTML = `${toggleSection}<span class="icon-diamond">◈</span><span class="txt-label">${node.title}</span>`;
+            let toggle = hasChildren ? `<span class="toggle-box">+</span>` : `<span style="width:30px;"></span>`;
+            row.innerHTML = `${toggle}<span>${node.title}</span>`;
             li.appendChild(row);
-
             if (hasChildren) {
                 const subUl = document.createElement('ul');
                 subUl.className = 'hidden';
                 draw(node.children, subUl);
                 li.appendChild(subUl);
-
                 row.onclick = (e) => {
                     const isHidden = subUl.classList.toggle('hidden');
-                    const txt = row.querySelector('.toggle-txt');
-                    if (txt) txt.textContent = isHidden ? '+' : '-';
+                    row.querySelector('.toggle-box').textContent = isHidden ? '+' : '-';
                     e.stopPropagation();
                 };
             }
@@ -926,47 +923,33 @@
     function searchMenu() {
         const keyword = document.getElementById('menuSearch').value.toLowerCase().trim();
         const allLi = document.querySelectorAll('#menuResult li');
-        const allRows = document.querySelectorAll('.menu-row');
-
-        // Reset trạng thái cũ
-        allRows.forEach(row => {
-            row.classList.remove('row-active');
-            const label = row.querySelector('.txt-label');
-            label.innerHTML = label.textContent; 
+        document.querySelectorAll('.menu-row').forEach(r => {
+            r.classList.remove('row-active');
+            const span = r.querySelector('span:last-child');
+            span.innerHTML = span.textContent;
         });
-
-        if (keyword === "") {
-            document.querySelectorAll('#menuResult ul:not(.root-ul)').forEach(ul => ul.classList.add('hidden'));
-            document.querySelectorAll('.toggle-txt').forEach(t => t.textContent = '+');
+        if (!keyword) {
+            document.querySelectorAll('#menuResult ul:not(.root-ul)').forEach(u => u.classList.add('hidden'));
+            document.querySelectorAll('.toggle-box').forEach(b => b.textContent = '+');
             return;
         }
-
         allLi.forEach(li => {
-            const labelSpan = li.querySelector('.txt-label');
-            const originalText = labelSpan.textContent;
             const row = li.querySelector('.menu-row');
-
-            if (originalText.toLowerCase().includes(keyword)) {
-                // Bôi sáng từ khóa
-                const regex = new RegExp(`(${keyword})`, 'gi');
-                labelSpan.innerHTML = originalText.replace(regex, '<mark>$1</mark>');
+            const span = row.querySelector('span:last-child');
+            const text = span.textContent;
+            if (text.toLowerCase().includes(keyword)) {
+                span.innerHTML = text.replace(new RegExp(`(${keyword})`, 'gi'), '<mark>$1</mark>');
                 row.classList.add('row-active');
-
-                // Bung các cấp cha
-                let p = li.parentElement; 
+                let p = li.parentElement;
                 while (p && p.id !== 'menuResult') {
                     p.classList.remove('hidden');
-                    const parentRow = p.parentElement.querySelector('.menu-row');
-                    if (parentRow) {
-                        const txt = parentRow.querySelector('.toggle-txt');
-                        if (txt) txt.textContent = '-';
-                    }
+                    const pRow = p.parentElement.querySelector('.menu-row');
+                    if (pRow && pRow.querySelector('.toggle-box')) pRow.querySelector('.toggle-box').textContent = '-';
                     p = p.parentElement.parentElement;
                 }
             }
         });
     }
 </script>
-
 </body>
 </html>
