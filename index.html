@@ -836,7 +836,7 @@
 
 <div class="output-panel">
     <div class="search-container">
-        <input type="text" id="menuSearch" placeholder="🔍 Nhập từ khóa tìm menu..." onkeyup="searchMenu()">
+        <input type="text" id="menuSearch" placeholder="🔍 Nhập từ khóa, nhấn Enter để nhảy tiếp..." onkeyup="searchMenu(event)">
         <button class="btn-setup" onclick="toggleInput()" title="Cài đặt dữ liệu">⚙️</button>
     </div>
     <div class="menu-wrapper" id="menuResult">
@@ -920,36 +920,76 @@
         parent.appendChild(ul);
     }
 
-    function searchMenu() {
-        const keyword = document.getElementById('menuSearch').value.toLowerCase().trim();
-        const allLi = document.querySelectorAll('#menuResult li');
-        document.querySelectorAll('.menu-row').forEach(r => {
-            r.classList.remove('row-active');
-            const span = r.querySelector('span:last-child');
-            span.innerHTML = span.textContent;
-        });
-        if (!keyword) {
-            document.querySelectorAll('#menuResult ul:not(.root-ul)').forEach(u => u.classList.add('hidden'));
-            document.querySelectorAll('.toggle-box').forEach(b => b.textContent = '+');
-            return;
+    let currentSearchIndex = -1; // Theo dõi vị trí kết quả hiện tại khi nhấn Enter
+
+function searchMenu(event) {
+    const keyword = document.getElementById('menuSearch').value.toLowerCase().trim();
+    const allLi = document.querySelectorAll('#menuResult li');
+    const allSubUls = document.querySelectorAll('#menuResult ul:not(.root-ul)');
+    const allRows = document.querySelectorAll('.menu-row');
+
+    // 1. Nếu là phím Enter thì thực hiện nhảy đến mục tiếp theo
+    if (event && event.key === "Enter") {
+        const activeResults = document.querySelectorAll('.row-active');
+        if (activeResults.length > 0) {
+            currentSearchIndex++;
+            if (currentSearchIndex >= activeResults.length) currentSearchIndex = 0; // Quay lại mục đầu tiên
+            
+            activeResults[currentSearchIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Hiệu ứng nháy nhẹ để biết đang đứng ở đâu
+            activeResults.forEach(r => r.style.outline = "none");
+            activeResults[currentSearchIndex].style.outline = "2px dashed #e67e22";
         }
-        allLi.forEach(li => {
-            const row = li.querySelector('.menu-row');
-            const span = row.querySelector('span:last-child');
-            const text = span.textContent;
-            if (text.toLowerCase().includes(keyword)) {
-                span.innerHTML = text.replace(new RegExp(`(${keyword})`, 'gi'), '<mark>$1</mark>');
-                row.classList.add('row-active');
-                let p = li.parentElement;
-                while (p && p.id !== 'menuResult') {
-                    p.classList.remove('hidden');
-                    const pRow = p.parentElement.querySelector('.menu-row');
-                    if (pRow && pRow.querySelector('.toggle-box')) pRow.querySelector('.toggle-box').textContent = '-';
-                    p = p.parentElement.parentElement;
-                }
-            }
-        });
+        return;
     }
+
+    // 2. Nếu gõ phím bình thường: Reset và tìm kiếm mới
+    currentSearchIndex = -1; 
+    allRows.forEach(row => {
+        row.classList.remove('row-active');
+        row.style.outline = "none";
+        const span = row.querySelector('span:last-child');
+        span.innerHTML = span.textContent;
+    });
+
+    if (!keyword) {
+        allSubUls.forEach(ul => ul.classList.add('hidden'));
+        document.querySelectorAll('.toggle-box').forEach(b => b.textContent = '+');
+        return;
+    }
+
+    // 3. Xử lý bung menu và bôi sáng
+    allLi.forEach(li => {
+        const row = li.querySelector('.menu-row');
+        const span = row.querySelector('span:last-child');
+        const text = span.textContent;
+
+        if (text.toLowerCase().includes(keyword)) {
+            span.innerHTML = text.replace(new RegExp(`(${keyword})`, 'gi'), '<mark>$1</mark>');
+            row.classList.add('row-active');
+
+            let p = li.parentElement;
+            while (p && p.id !== 'menuResult') {
+                if (p.tagName === 'UL') {
+                    p.classList.remove('hidden');
+                    const parentRow = p.previousElementSibling; 
+                    if (parentRow && parentRow.classList.contains('menu-row')) {
+                        const btn = parentRow.querySelector('.toggle-box');
+                        if (btn) btn.textContent = '-';
+                    }
+                }
+                p = p.parentElement;
+            }
+        }
+    });
+
+    // Tự động nhảy đến mục đầu tiên ngay khi gõ xong
+    const firstResult = document.querySelector('.row-active');
+    if (firstResult) {
+        firstResult.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
 </script>
 </body>
 </html>
