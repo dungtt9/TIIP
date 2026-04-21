@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>ERP Menu - Deep Search & Highlight</title>
+    <title>ERP Menu - Dũng Tech</title>
     <style>
         body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; display: flex; height: 100vh; background: #f0f2f5; }
         
@@ -10,66 +10,858 @@
         .input-panel { width: 30%; padding: 20px; background: #2c3e50; color: white; display: flex; flex-direction: column; }
         .output-panel { width: 70%; padding: 20px; overflow-y: auto; }
         
-        textarea { flex: 1; margin-top: 10px; font-family: 'Consolas', monospace; padding: 12px; border: none; font-size: 13px; outline: none; border-radius: 4px; }
+        textarea { flex: 1; margin-top: 10px; font-family: 'Consolas', monospace; padding: 12px; border: none; font-size: 13px; outline: none; border-radius: 4px; color: #333; }
         button { margin-top: 15px; padding: 12px; background: #e67e22; color: white; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; }
+        button:hover { background: #d35400; }
 
         /* Search Box */
-        .search-container { margin-bottom: 15px; }
+        .search-container { margin-bottom: 15px; position: sticky; top: 0; background: #f0f2f5; z-index: 10; padding-bottom: 10px; }
         #menuSearch { width: 100%; padding: 12px 20px; font-size: 15px; border: 2px solid #b32d2e; border-radius: 4px; outline: none; box-sizing: border-box; font-weight: 500; }
 
         /* Menu Container */
-        .menu-wrapper { background: white; border: 1px solid #d1d1d1; padding: 10px 20px; min-height: 500px; border-radius: 4px; }
+        .menu-wrapper { background: white; border: 1px solid #d1d1d1; padding: 10px 20px; min-height: 500px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         ul { list-style: none; padding-left: 25px; margin: 0; }
         li { margin: 0; padding: 0; }
         .root-ul { padding-left: 0; }
         
-        .menu-row { display: flex; align-items: center; padding: 6px 5px; cursor: pointer; font-size: 15px; line-height: 1.2; border-radius: 4px; }
+        .menu-row { display: flex; align-items: center; padding: 6px 5px; cursor: pointer; font-size: 15px; line-height: 1.2; border-radius: 4px; transition: 0.2s; }
         .menu-row:hover { background: #f1f2f6; }
 
         /* Bôi sáng mục tìm được */
         mark { background: #ffeb3b; color: #000; padding: 0; font-weight: bold; }
-        .row-active { background: #fffde7; border-left: 3px solid #fbc02d; }
+        .row-active { background: #fffde7; border-left: 4px solid #fbc02d; }
 
         /* Phân cấp màu sắc */
-        .lvl-1 { color: #b32d2e; font-weight: bold; border-bottom: 1px solid #eee; margin-top: 4px; }
-        .lvl-2 { color: #1a237e; font-weight: 600; }
-        .lvl-3 { color: #000000; font-style: italic; font-weight: normal; }
+        .lvl-1 { color: #b32d2e; font-weight: bold; border-bottom: 1px solid #eee; margin-top: 10px; font-size: 16px; }
+        .lvl-2 { color: #1a237e; font-weight: 600; margin-top: 5px; }
+        .lvl-3 { color: #333; font-style: normal; font-weight: normal; padding-left: 10px; }
 
         /* Icons */
         .toggle-box { 
-            width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; 
-            margin-right: 12px; border: 1px solid #777; background: #fff; flex-shrink: 0; user-select: none;
+            width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; 
+            margin-right: 12px; border: 1px solid #777; background: #fff; flex-shrink: 0; user-select: none; border-radius: 2px;
         }
-        .toggle-txt { font-size: 17px; font-weight: bold; color: #333; }
-        .icon-diamond { font-size: 16px; margin-right: 10px; width: 20px; flex-shrink: 0; text-align: center; }
+        .toggle-txt { font-size: 14px; font-weight: bold; color: #333; line-height: 1; }
+        .icon-diamond { font-size: 14px; margin-right: 10px; width: 20px; flex-shrink: 0; text-align: center; color: #7f8c8d; }
 
         .hidden { display: none; }
-        .force-show { display: block !important; }
     </style>
 </head>
 <body>
 
 <div class="input-panel">
     <h2>1. Nhập Dữ Liệu</h2>
-    <textarea id="rawInput" placeholder="++ Cấp 1&#10;+ Cấp 2&#10;Chi tiết cấp 3"></textarea>
-    <button onclick="renderERP()">CẬP NHẬT MENU ◈</button>
+    <p style="font-size: 12px; color: #bdc3c7;">Dán menu (786 dòng) vào đây. Sử dụng ++ cho Cấp 1, + cho Cấp 2.</p>
+    <textarea id="rawInput" placeholder="Nhập dữ liệu tại đây...">
+++	系统管理SM - Quản lý hệ thống (SM)	--Xìtǒng guǎnlǐ SM
+	菜单管理 - Quản lý Menu	--Càidān guǎnlǐ
+	文件管理 - Quản lý Tập tin	--Wénjiàn guǎnlǐ
+	权限管理(系统) - Quản lý Quyền truy cập (Hệ thống)	--Quánxián guǎnlǐ (xìtǒng)
+	窗口管理 - Quản lý Cửa sổ	--Chuāngkǒu guǎnlǐ
+	系统登录日志 - Nhật ký Đăng nhập Hệ thống	--Xìtǒng dēnglù rìzhì
+	重要操作日志 - Nhật ký Thao tác Quan trọng	--Zhòngyào cāozuò rìzhì
+	客户端注册管理 - Quản lý Đăng ký Khách hàng	--Kèhùduān zhùcè guǎnlǐ
+	本公司信息维护 - Bảo trì Thông tin Công ty	--Běn gōngsī xìnxī wéihù
+++	数据字典DC - Từ điển dữ liệu (DC)	--Shùjù zìdiǎn DC
++	公共类 - Danh mục Công khai	--Gōnggòng lèi
+	单位类型 - Loại đơn vị	--Dānwèi lèixíng
+	系统使用单位 - Đơn vị người dùng hệ thống	--Xìtǒng shǐyòng dānwèi
+	单位换算维护 - Bảo trì chuyển đổi đơn vị	--Dānwèi huànsuàn wéihù
+	单位维护 - Bảo trì đơn vị	--Dānwèi wéihù
+	币种维护 - Bảo trì tiền tệ	--Bìzhǒng wéihù
+	通用模块定义(系统) - Định nghĩa mô-đun chung (Hệ thống)	--Tōngyòng mókuài dìngyì (xìtǒng)
+	通用单据配置(系统) - Cấu hình tài liệu chung (Hệ thống)	--Tōngyòng dānjù pèizhì (xìtǒng)
++	用户字典数据维护 - Bảo trì dữ liệu từ điển người dùng	--Yònghù zìdiǎn shùjù wéihù
++	技术管理类 - Danh mục Quản lý kỹ thuật	--Jìshù guǎnlǐ lèi
+	染色升温工艺类型 - Loại quy trình tăng nhiệt độ nhuộm	--Rǎnsè shēngwēn gōngyì lèixíng
+	打样类型 - Loại mẫu	--Dǎyàng lèixíng
+	打样参数 - Thông số mẫu	--Dǎyàng cānshù
+	打样明细分类 - Chi tiết mẫu Phân loại	--Dǎyàng míngxì fēn lèi
+	对色光源 - Nguồn sáng phù hợp màu sắc	--Duì sè guāngyuán
+	染色方式 - Phương pháp nhuộm	--Rǎnsè fāngshì
+	交样类型 - Loại giao hàng mẫu	--Jiāo yàng lèixíng
+	颜色名称维护 - Tên màu Bảo trì	--Yánsè míngchēng wéihù
+	处方开单类型 - Loại đơn đặt hàng theo toa	--Chǔfāng kāidān lèixíng
+	色级 - Cấp độ màu	--Sè jí
++	销售管理类 - Danh mục Quản lý bán hàng	--Xiāoshòu guǎnlǐ lèi
+	船期限制 - Hạn chế về lịch trình vận chuyển	--Chuánqī xiànzhì
+	客户类型 - Loại khách hàng	--Kèhù lèixíng
+	公司属性 - Thuộc tính công ty	--Gōngsī shǔxìng
+	交期要求 - Yêu cầu về thời gian giao hàng	--Jiāo qī yāoqiú
+	付款方式 - Phương thức thanh toán	--Fùkuǎn fāngshì
+	经营方式 - Mô hình kinh doanh	--Jīngyíng fāngshì
+	运输方式 - Phương thức vận chuyển	--Yùnshū fāngshì
+	交易方式 - Phương thức giao dịch	--Jiāoyì fāngshì
+	退货原因 - Lý do trả hàng	--Tuìhuò yuányīn
+	客户等级 - Xếp hạng khách hàng	--Kèhù děngjí
+	合同类别 - Loại hợp đồng	--Hétóng lèibié
+	订单类型 - Loại đơn hàng	--Dìngdān lèixíng
+	结算类型 - Loại thanh toán	--Jiésuàn lèixíng
+	加工方式 - Phương thức xử lý	--Jiāgōng fāngshì
+	客户信用级别 - Xếp hạng tín dụng khách hàng	--Kèhù xìnyòng jíbié
+	出货确认意见 - Ý kiến ​​xác nhận vận chuyển	--Chūhuò quèrèn yìjiàn
+	季节 - Mùa vụ	--Jìjié
+	出货计划类型 - Loại kế hoạch vận chuyển	--Chūhuò jìhuà lèixíng
++	计划调度类 - Danh mục Lập kế hoạch và Lịch trình	--Jìhuà diàodù lèi
+	计划紧急程度 - Mức độ khẩn cấp của kế hoạch	--Jìhuà jǐnjí chéngdù
+	外发结算类型 - Loại hình thanh toán thuê ngoài	--Wàifā jiésuàn lèixíng
+	外发交货地点 - Địa điểm giao hàng thuê ngoài	--Wàifā jiāohuò dìdiǎn
+	外发纱用途 - Mục đích sử dụng sợi thuê ngoài	--Wàifā shā yòngtù
+	外发合同分类 - Phân loại hợp đồng thuê ngoài	--Wàifā hétóng fēn lèi
++	生产作业类 - Danh mục Vận hành sản xuất	--Shēngchǎn zuòyè lèi
+	工作时间安排 - Lịch làm việc	--Gōngzuò shíjiān ān pái
+	工作时间调整 - Điều chỉnh lịch làm việc	--Gōngzuò shíjiān tiáozhěng
+	生产反馈信息类别 - Thông tin phản hồi sản xuất (Các loại)	--Shēngchǎn fǎnkuì xìnxī lèibié
+	生产反馈信息紧急程度 - Mức độ khẩn cấp của thông tin phản hồi sản xuất	--Shēngchǎn fǎnkuì xìnxī jǐnjí chéngdù
++	质量管理类 - Danh mục Quản lý chất lượng	--Zhìliàng guǎnlǐ lèi
+	客户投诉类型 - Loại khiếu nại của khách hàng	--Kèhù tóusù lèixíng
+	对色标准 - Tiêu chuẩn phối màu	--Duì sè biāozhǔn
+	开剪类型 - Kiểu cắt	--Kāi jiǎn lèixíng
+	颜色等级 - Cấp độ màu	--Yánsè děngjí
+	QC测试结论 - Kết luận kiểm tra QC	--QC cèshì jiélùn
+	测试品种类型 - Loại thử nghiệm	--Cèshì pǐnzhǒng lèixíng
++	物流管理类 - Danh mục Quản lý hậu cần	--Wùliú guǎnlǐ lèi
+	供应商开户行 - Tài khoản ngân hàng của nhà cung cấp	--Gōngyìngshāng kāihù háng
+	拾度 - Mức độ	--Shídù
+	织物类型 - Loại vải	--Zhìwù lèixíng
+	物料状态 - Tình trạng vật liệu	--Wùliào zhuàngtài
+	库存ABCD码 - Mã hàng tồn kho (A, B, C, D)	--Kùcún ABCD mǎ
+	组织结构(布种) - Cấu trúc dệt (Loại vải)	--Zǔzhī jiégòu (bùzhǒng)
+	样品种类 - Loại mẫu	--Yàngpǐn zhǒnglèi
+	样品加工方式 - Phương pháp xử lý mẫu	--Yàngpǐn jiāgōng fāngshì
+	抢向 - Mục tiêu	--Qiǎng xiàng
+	纱类 - Loại sợi	--Shā lèi
+	纱支 - Số sợi	--Shā zhī
+	采购合同签约地点 - Địa điểm ký kết hợp đồng mua hàng	--Cǎigòu hétóng dīngyuē dìdiǎn
+	包装要求 - Yêu cầu đóng gói	--Bāozhuāng yāoqiú
+	采购支付人 - Bên thanh toán	--Cǎigòu zhīfù rén
+	运输方式 - Phương thức vận chuyển	--Yùnshū fāngshì
+	采购合同分类 - Phân loại hợp đồng mua hàng	--Cǎigòu hétóng fēn lèi
++	人力资源类 - Danh mục Nhân sự	--Rénlì zīyuán lèi
+	住宿地点 - Địa điểm cư trú	--Zhùsù dìdiǎn
+	户口性质 - Loại đăng ký hộ gia đình	--Hùkǒu xìngzhì
+	合同类型 - Loại hợp đồng	--Hétóng lèixíng
+	毕业类型 - Loại tốt nghiệp	--Bìyè lèixíng
+	政治面貌 - Liên kết chính trị	--Zhèngzhì miànmào
+	招聘方式 - Phương thức tuyển dụng	--Zhāopìn fāngshì
+	学历 - Trình độ học vấn	--Xuélì
+	工种 - Loại công việc	--Gōngzhǒng
+	学位 - Bằng cấp	--Xuévèi
+	职工状态 - Tình trạng nhân viên	--Zhígōng zhuàngtài
+	性别 - Giới tính	--Xìngbié
+	婚姻状况 - Tình trạng hôn nhân	--Hūnyīn zhuàngtài
+	用工性质 - Loại hình việc làm	--Yònggōng xìngzhì
+	离职类型 - Loại hình từ chức	--Lízhí lèixíng
+	工资类别 - Hạng mục lương	--Gōngzī lèibié
+	职称维护 - Chức danh chuyên môn Bảo trì	--Zhíchēng wéihù
++	设备管理类 - Danh mục Quản lý thiết bị	--Shèbèi guǎnlǐ lèi
+	机型参数 - Các tham số mô hình	--Jīxíng cānshù
++	单证管理类 - Danh mục Quản lý tài liệu	--Dānjù guǎnlǐ lèi
+	结汇方式 - Phương thức thanh toán	--Jiéhuì fāngshì
+	电汇类型 - Loại chuyển khoản ngân hàng	--Diànhuì lèixíng
+	进出口相关费用名称 - Phí liên quan đến xuất nhập khẩu	--Jìn chūkǒu xiāngguān fèiyòng míngchēng
+	融资方式 - Phương thức tài chính	--Róngzī fāngshì
+	包装种类 - Loại đóng gói	--Bāozhuāng zhǒnglèi
+	成交方式 - Phương thức giao dịch	--Chéngjiāo fāngshì
+	价格条款 - Điều khoản giá cả	--Jiàgé tiáokuǎn
+	贸易方式 - Điều khoản thương mại	--Màoyì fāngshì
+	免征性质 - Loại miễn thuế	--Miànzhēng xìngzhì
+	信用证类型 - Loại thư tín dụng	--Xìnyòngzhèng lèixíng
+	信用证形式 - Mẫu thư tín dụng	--Xìnyòngzhèng xíngshì
+	运费交付方式 - Phương thức thanh toán cước vận chuyển	--Yùnfèi jiāofù fāngshì
+++	技术管理TM - Quản lý kỹ thuật (TM)	--Jìshù guǎnlǐ TM
++	基础资料维护 - Bảo trì dữ liệu cơ bản	--Jīchǔ zīliào wéihù
+	工序列表 - Danh sách quy trình	--Gōngxù lièbiǎo
+	物料BOM表 - Danh mục vật liệu (BOM)	--Wùliào BOM biǎo
+	工艺配方模板(漂炼车间) - Mẫu công thức quy trình (Xưởng tẩy trắng)	--Gōngyì pèifāng múbǎn (piǎoliàn chējiān)
+	工艺配方模板(整理车间) - Mẫu công thức quy trình (Xưởng hoàn thiện)	--Gōngyì pèifāng múbǎn (zhěnglǐ chējiān)
+	工艺配方模板(染色车间) - Mẫu công thức quy trình (Xưởng nhuộm)	--Gōngyì pèifāng múbǎn (rǎnsè chējiān)
+	工艺配方模板(缸染车间) - Mẫu công thức quy trình (Xưởng nhuộm pin)	--Gōngyì pèifāng múbǎn (gāngrǎn chējiān)
+	工艺配方模板(印花车间) - Mẫu công thức quy trình (Xưởng in)	--Gōngyì pèifāng múbǎn (yìnhuā chējiān)
+	调色师 - Chuyên viên phối màu	--Tiáosèshī
+	调色师组 - Nhóm chuyên viên phối màu	--Tiáosèshī zǔ
+	调色师组(印花) - Nhóm chuyên viên phối màu (In ấn)	--Tiáosèshī zǔ (yìnhuā)
+	调色师(印花) - Chuyên viên phối màu (In ấn)	--Tiáosèshī (yìnhuā)
+	工艺路线设计 - Thiết kế lộ trình quy trình	--Gōngyì lùxiàn shèjì
+	工艺路线设计(漂染回修) - Thiết kế lộ trình quy trình (Làm lại công đoạn tẩy trắng và nhuộm)	--Gōngyì lùxiàn shèjì (piǎorǎn huíxiū)
+	工艺路线设计(前处理) - Thiết kế lộ trình quy trình (Xử lý sơ bộ)	--Gōngyì lùxiàn shèjì (qián chǔlǐ)
+	打样质量参数维护 - Duy trì thông số chất lượng mẫu	--Dǎyàng zhìliàng cānshù wéihù
+	颜色名称维护 - Duy trì tên màu	--Yánsè míngchēng wéihù
+	颜色难度类型 - Loại độ khó của màu	--Yánsè nándù lèixíng
+	网库库位 - Vị trí cơ sở dữ liệu web	--Wǎng kù kù wèi
++	打样管理(LD) - Quản lý lấy mẫu (LD)	--Dǎyàng guǎnlǐ (LD)
+	打样申请单(染色) - Phiếu Yêu Cầu Mẫu (Nhuộm)	--Dǎyàng shēnqǐngdān (rǎnsè)
+	染色出样单 - Đơn Đặt Hàng Mẫu Nhuộm	--Rǎnsè chū yàng dān
+	打样价格查询 - Yêu Cầu Báo Giá Mẫu	--Dǎyàng jiàgé cháxún
+	打样价格查询(缸染) - Yêu Cầu Báo Giá Mẫu (Nhuộm Pin)	--Dǎyàng jiàgé cháxún (gāngrǎn)
+	打样色号引用 - Mã Màu Mẫu Tham Khảo	--Dǎyàng sèhào yǐnyòng
+	打样计划(染色) - Kế Hoạch Mẫu (Nhuộm)	--Dǎyàng jìhuà (rǎnsè)
+	ABC配方(染色) - Công Thức ABC (Nhuộm)	--ABC pèifāng (rǎnsè)
+	打样送样(染色) - Gửi Mẫu (Nhuộm)	--Dǎyàng sòng yàng (rǎnsè)
+	取消送样(染色) - Hủy Mẫu (Nhuộm)	--Qǔxiāo sòng yàng (rǎnsè)
+	OK样确认单(染色) - Phiếu Xác Nhận Mẫu Đạt (Nhuộm)	--OK yàng quèrèndān (rǎnsè)
+	OK样确认修改单(染色) - Phiếu Sửa Đổi Xác Nhận Mẫu Đạt (Nhuộm)	--OK yàng quèrèn xiūgǎidān (rǎnsè)
+	OK样查询(染色) - Yêu Cầu Mẫu Đạt (Nhuộm)	--OK yàng cháxún (rǎnsè)
+	打样进度查询(染色) - Yêu Cầu Tiến Độ Mẫu (Nhuộm)	--Dǎyàng jìndù cháxún (rǎnsè)
+	打样员任务统计 - Thống Kê Nhiệm Vụ Lấy Mẫu	--Dǎyàng yuán rènwù tǒngjì
+	LD样配方查询(染色) - Yêu Cầu Công Thức Mẫu LD (Nhuộm)	--LD yàng pèifāng cháxún (rǎnsè)
++	打样管理(印花) - Quản lý lấy mẫu (In ấn)	--Dǎyàng guǎnlǐ (yìnhuā)
+	S/O配方成本 - Chi phí công thức S/O	--S/O pèifāng chéngběn
+	打样申请单(印花) - Phiếu yêu cầu lấy mẫu (In ấn)	--Dǎyàng shēnqǐngdān (yìnhuā)
+	打样申请单(印花追加配色) - Phiếu yêu cầu lấy mẫu (In thêm màu)	--Dǎyàng shēnqǐngdān (yìnhuā zhuījiā pèisè)
+	打样申请单(印花)查询 - Phiếu yêu cầu lấy mẫu (In ấn) Yêu cầu thông tin	--Dǎyàng shēnqǐngdān (yìnhuā) cháxún
+	打样申请单(印花追加配色)查询 - Phiếu yêu cầu lấy mẫu (In thêm màu) Yêu cầu thông tin	--Dǎyàng shēnqǐngdān (yìnhuā zhuījiā pèisè) cháxún
+	打样进度查询(印花) - Yêu cầu thông tin tiến độ lấy mẫu (In ấn)	--Dǎyàng jìndù cháxún (yìnhuā)
+	打样计划(印花) - Kế hoạch lấy mẫu (In ấn)	--Dǎyàng jìhuà (yìnhuā)
+	ABC配方(印花) - Công thức ABC (In ấn)	--ABC pèifāng (yìnhuā)
+	打样送样(印花) - Gửi mẫu (In ấn)	--Dǎyàng sòng yàng (yìnhuā)
+	取消送样(印花) - Hủy gửi mẫu (In ấn)	--Qǔxiāo sòng yàng (yìnhuā)
+	OK样确认单(印花) - Phiếu xác nhận mẫu đạt yêu cầu (In ấn)	--OK yàng quèrèndān (yìnhuā)
+	OK样确认修改单(印花) - Phiếu sửa đổi xác nhận mẫu đạt yêu cầu (In ấn)	--OK yàng quèrèn xiūgǎidān (yìnhuā)
+	OK样查询(印花) - Yêu cầu thông tin mẫu đạt yêu cầu (In ấn)	--OK yàng cháxún (yìnhuā)
+	SO样配方查询(印花) - Yêu cầu thông tin công thức mẫu SO (In ấn)	--SO yàng pèifāng cháxún (yìnhuā)
+	小网费用登记 - Đăng ký phí mạng lưới nhỏ	--Xiǎo wǎng fèiyòng dēngjì
+	打样统计(印花) - Thống kê lấy mẫu (In ấn)	--Dǎyàng tǒngjì (yìnhuā)
++	订单工序 - Quy trình đặt hàng	--Dìngdān gōngxù
+	订单工艺路线查询(总经理) - Tra cứu lộ trình quy trình đặt hàng (Tổng Giám đốc)	--Dìngdān gōngyì lùxiàn cháxún (zǒngjīnglǐ)
++	基础资料维护 - Bảo trì dữ liệu cơ bản	--Jīchǔ zīliào wéihù
+	工序参数设定 - Thiết lập thông số quy trình	--Gōngxù cānshù shèdìng
+	工序模板维护 - Bảo trì mẫu quy trình	--Gōngxù múbǎn wéihù
+	订单工艺路线 - Lộ trình quy trình đặt hàng	--Dìngdān gōngyì lùxiàn
+	订单工艺路线(查询) - Lộ trình quy trình đặt hàng (Truy vấn)	--Dìngdān gōngyì lùxiàn (cháxún)
+	订单工艺路线(业务组查询) - Lộ trình quy trình đặt hàng (Truy vấn nhóm kinh doanh)	--Dìngdān gōngyì lùxiàn (yèwù zǔ cháxún)
+	订单工艺路线(指定机台) - Lộ trình quy trình đặt hàng (Máy móc cụ thể)	--Dìngdān gōngyì lùxiàn (zhǐdìng jītái)
+	生产卡工艺路线 - Lộ trình quy trình thẻ sản xuất	--Shēngchǎn kǎ gōngyì lùxiàn
+	生产卡工艺路线查询(技术) - Truy vấn lộ trình quy trình thẻ sản xuất (Kỹ thuật)	--Shēngchǎn kǎ gōngyì lùxiàn cháxún (jìshù)
+	工艺路线查询 - Truy vấn lộ trình quy trình	--Gōngyì lùxiàn cháxún
+	订单工艺路线评审查询 - Truy vấn xem xét lộ trình quy trình đặt hàng	--Dìngdān gōngyì lùxiàn píngshěn cháxún
+	订单工艺路线查询(技术部) - Truy vấn lộ trình quy trình đặt hàng (Bộ phận kỹ thuật)	--Dìngdān gōngyì lùxiàn cháxún (jìshù bù)
+	订单工艺修改申请 - Yêu cầu sửa đổi quy trình đặt hàng	--Dìngdān gōngyì xiūgǎi shēnqǐng
+	复制订单工艺路线 - Sao chép lộ trình quy trình đặt hàng	--Fùzhì dìngdān gōngyì lùxiàn
++	色号库 - Thư viện mã màu	--Sèhào kù
+	色号库(染色) - Thư viện mã màu (Nhuộm)	--Sèhào kù (rǎnsè)
+	色号库查询 - Tìm kiếm trong thư viện mã màu	--Sèhào kù cháxún
++	印花库 - Thư viện in ấn	--Yìnhuā kù
+	印花糊料 - Mực in	--Yìnhuā húliào
+	印花库(通用) - Thư viện in (Tổng quát)	--Yìnhuā kù (tōngyòng)
+	印花库(打样评审) - Thư viện in (Kiểm tra bản in thử)	--Yìnhuā kù (dǎyàng píngshěn)
+	印花库(打样评审)查询 - Tìm kiếm thư viện in (Kiểm tra bản in thử)	--Yìnhuā kù (dǎyàng píngshěn) cháxún
+	印花库(旧系统) - Thư viện in (Hệ thống cũ)	--Yìnhuā kù (jiù xìtǒng)
++	配方管理 - Quản lý công thức	--Pèifāng guǎnlǐ
+	染色升温曲线 - Đường cong tăng nhiệt độ nhuộm	--Rǎnsè shēngwēn qūxiàn
+	升温程式 - Chương trình tăng nhiệt độ	--Shēngwēn chéngshì
+	·染程 - Quy trình nhuộm	--Rǎn chéng
+	工艺曲线 - Đường cong quy trình	--Gōngyì qūxiàn
+	工艺配方(染色中样) - Công thức quy trình (Mẫu nhuộm)	--Gōngyì pèifāng (rǎnsè zhòng yàng)
+	工艺配方(印花小样复样) - Công thức quy trình (Mẫu in)	--Gōngyì pèifāng (yìnhuā xiǎoyàng fù yàng)
+	,工艺配方查询 - Yêu cầu công thức quy trình	--Gōngyì pèifāng cháxún
++	处方管理 - Quản lý đơn thuốc	--Chǔfāng guǎnlǐ
+	工艺处方(漂炼车间) - Hướng dẫn quy trình (Xưởng tẩy trắng)	--Gōngyì chǔfāng (piǎoliàn chējiān)
+	工艺处方(染色车间) - Hướng dẫn quy trình (Xưởng nhuộm)	--Gōngyì chǔfāng (rǎnsè chējiān)
+	洗缸直接开处方 - Hướng dẫn trực tiếp cho bể giặt	--Xǐ gāng zhíjiē kāi chǔfāng
+	工艺处方(缸染车间) - Hướng dẫn quy trình (Xưởng nhuộm thùng)	--Gōngyì chǔfāng (gāngrǎn chējiān)
+	工艺处方(缸染车间)加料 - Hướng dẫn quy trình (Xưởng nhuộm thùng) - Bổ sung nguyên liệu	--Gōngyì chǔfāng (gāngrǎn chējiān) jiāliào
+	工艺处方(印花车间) - Hướng dẫn quy trình (Xưởng in)	--Gōngyì chǔfāng (yìnhuā chējiān)
+	工艺处方(整理车间) - Hướng dẫn quy trình (Xưởng hoàn thiện)	--Gōngyì chǔfāng (zhěnglǐ chējiān)
+	工艺处方(整理车间)加料 - Hướng dẫn quy trình (Xưởng hoàn thiện) - Bổ sung nguyên liệu	--Gōngyì chǔfāng (zhěnglǐ chējiān) jiāliào
+	处方单开料查询 - Yêu cầu nguyên liệu theo đơn đặt hàng	--Chǔfāng dān kāiliào cháxún
+	处方开料汇总查询 - Yêu cầu tóm tắt nguyên liệu theo đơn đặt hàng	--Chǔfāng kāiliào huìzǒng cháxún
+	处方加料次数查询 - Yêu cầu tần suất bổ sung nguyên liệu theo đơn đặt hàng	--Chǔfāng jiāliào cìshù cháxún
+	园网单价维护 - Bảo trì đơn giá mạng	--Yuánwǎng dānjià wéihù
+++	销售管理SD - Quản lý bán hàng (SD)	--Xiāoshòu guǎnlǐ SD
++	基础资料维护 (Bảo trì dữ liệu cơ bản)	--Jīchǔ zīliào wéihù
++	客户销售员 (Khách hàng & Nhân viên bán hàng)	--Kèhù xiāoshòuyuán
+	客户资料维护(高级) (Bảo trì thông tin khách hàng - Cao cấp)	--Kèhù zīliào wéihù (gāojí)
+	销售员维护 (Bảo trì thông tin nhân viên bán hàng)	--Xiāoshòuyuán wéihù
++	产品价格 (Giá sản phẩm)	--Chǎnpǐn jiàgé
+	工序价格维护 (Bảo trì giá công đoạn)	--Gōngxù jiàgé wéihù
++	工艺资料 (Dữ liệu quy trình công nghệ)	--Gōngyì zīliào
+	质量参数维护 (Bảo trì thông số chất lượng)	--Zhìliàng cānshù wéihù
+	质量参数模板维护 (Bảo trì biểu mẫu thông số chất lượng)	--Zhìliàng cānshù múbǎn wéihù
+	质量参数模板维护（管理） (Bảo trì biểu mẫu thông số chất lượng - Quản lý)	--Zhìliàng cānshù múbǎn wéihù (guǎnlǐ)
+	特殊整理方式 (Phương thức xử lý đặc biệt)	--Tèshū zhěnglǐ fāngshì
+	订单采购交期维护表 (Bảng bảo trì thời hạn mua hàng của đơn hàng)	--Dìngdān cǎigòu jiāo qī wéihù biǎo
+	订单PS维护表 (Bảng bảo trì PS đơn hàng)	--Dìngdān PS wéihù biǎo
+	订单变更配置 (Cấu hình thay đổi đơn hàng)	--Dìngdān biàngēng pèizhì
+	开发 (Phát triển)	--Kāifā
++	生产订单 (Đơn hàng sản xuất)	--Shēngchǎn dìngdān
+	生产订单(订单评审) (Đơn hàng sản xuất - Đánh giá đơn hàng)	--Shēngchǎn dìngdān (dìngdān píngshěn)
+	PMC生产订单补单 (Bổ sung đơn hàng sản xuất PMC)	--PMC shēngchǎn dìngdān bǔdān
+	生产订单(老数据补入) (Đơn hàng sản xuất - Nhập bổ sung dữ liệu cũ)	--Shēngchǎn dìngdān (lǎo shùjù bǔ rù)
+	生产订单(全部) (Đơn hàng sản xuất - Tất cả)	--Shēngchǎn dìngdān (quánbù)
+	订单查询(带属性) (Truy vấn đơn hàng - Kèm thuộc tính)	--Dìngdān cháxún (dài shǔxìng)
+	订单查询（总经理） (Truy vấn đơn hàng - Tổng giám đốc)	--Dìngdān cháxún (zǒngjīnglǐ)
+	取消订单评审 (Hủy đánh giá đơn hàng)	--Qǔxiāo dìngdān píngshěn
+	订单更改 (Thay đổi đơn hàng)	--Dìngdān gēnggǎi
+	订单更改信息查询 (Truy vấn thông tin thay đổi đơn hàng)	--Dìngdān gēnggǎi xìnxī cháxún
+	手动完结订单 (Kết thúc đơn hàng thủ công)	--Shǒudòng wánjié dìngdān
+	订单完工报告 (Báo cáo hoàn thành đơn hàng)	--Dìngdān wángōng bàogào
+	办单风险评估 (Đánh giá rủi ro lên đơn)	--Bàn dān fēngxiǎn pínggū
+	办单风险评估（只读） (Đánh giá rủi ro lên đơn - Chỉ đọc)	--Bàn dān fēngxiǎn pínggū (zhǐ dú)
++	出货计划 (Kế hoạch xuất hàng)	--Chūhuò jìhuà
+	出货计划(外销) (Kế hoạch xuất hàng - Xuất khẩu)	--Chūhuò jìhuà (wàixiāo)
+	出货计划(内销) (Kế hoạch xuất hàng - Nội địa)	--Chūhuò jìhuà (nèixiāo)
+	出货计划(只读) (Kế hoạch xuất hàng - Chỉ đọc)	--Chūhuò jìhuà (zhǐ dú)
+	出货计划查询 (Truy vấn kế hoạch xuất hàng)	--Chūhuò jìhuà cháxún
+	出货计划查询(财务) (Truy vấn kế hoạch xuất hàng - Tài chính)	--Chūhuò jìhuà cháxún (cáiwù)
+	订单指定批次 (Chỉ định lô hàng cho đơn hàng)	--Dìngdān zhǐdìng pìcì
+	发票申请 (Yêu cầu xuất hóa đơn)	--Fāpiào shēnqǐng
+	发票申请(审核) (Yêu cầu xuất hóa đơn - Kiểm duyệt)	--Fāpiào shēnqǐng (shěnhé)
+++	计划调度PS - Lập kế hoạch sản xuất (PS)	--Jìhuà diàodù PS
++	基础资料 (Dữ liệu cơ bản)	--Jīchǔ zīliào
+	工作中心 (Trung tâm công việc)	--Gōngzuò zhōngxīn
+	排机项目维护 (Bảo trì dự án sắp xếp máy)	--Pái jī xiàngmù wéihù
+	摆布产能维护表 (Bảng bảo trì năng suất xếp vải)	--Bǎibù chǎnnéng wéihù biǎo
+	成检车速标准维护 (Bảo trì tiêu chuẩn tốc độ xe kiểm tra thành phẩm)	--Chéng jiǎn chēsù biāozhǔn wéihù
+	机台转换时间 (Thời gian chuyển đổi máy móc)	--Jītái zhuǎnhuàn shíjiān
+	放样时间 (Thời gian làm mẫu/phóng mẫu)	--Fàng yàng shíjiān
+	排产箱数计算维护 (Bảo trì tính toán số thùng lập kế hoạch sản xuất)	--Pái chǎn xiāng shù jìsuàn wéihù
++	车间总调度 (Tổng điều độ phân xưởng)	--Chējiān zǒng diàodù
+	生产计划安排(永新) (Sắp xếp kế hoạch sản xuất - Vĩnh Tân)	--Shēngchǎn jìhuà ān pái (Yǒngxīn)
+	主计划下发(永新) (Ban hành kế hoạch chính - Vĩnh Tân)	--Zhǔ jìhuà xiàfā (Yǒngxīn)
++	生产卡管理 (Quản lý thẻ sản xuất)	--Shēngchǎn kǎ guǎnlǐ
+	生产流转卡[1] (Thẻ luân chuyển sản xuất [1])	--Shēngchǎn liúzhuǎnkǎ [1]
+	生产流转卡拆分 (Chia tách thẻ luân chuyển sản xuất)	--Shēngchǎn liúzhuǎnkǎ chāifēn
+	打印流转卡 (In thẻ luân chuyển)	--Dǎyìn liúzhuǎnkǎ
+	生产补卡 (Cấp lại thẻ sản xuất)	--Shēngchǎn bǔ kǎ
+	关闭生产卡 (Đóng thẻ sản xuất)	--Guānbì shēngchǎn kǎ
+	取消生产卡 (Hủy thẻ sản xuất)	--Qǔxiāo shēngchǎn kǎ
+	删除生产卡/回修卡 (Xóa thẻ sản xuất/thẻ sửa chữa)	--Shānchú shēngchǎn kǎ/huíxiū kǎ
+	修改生产卡数量 (Sửa đổi số lượng trên thẻ sản xuất)	--Xiūgǎi shēngchǎn kǎ shùliàng
+	关闭/取消/暂停生产卡日志查询 (Truy vấn nhật ký đóng/hủy/tạm dừng thẻ sản xuất)	--Guānbì/qǔxiāo/zànfàng shēngchǎn kǎ rìzhì cháxún
++	车间生产排机计划 (Kế hoạch sắp xếp máy sản xuất tại phân xưởng)	--Chējiān shēngchǎn pái jī jìhuà
+	漂炼车间计划 (Kế hoạch phân xưởng tẩy luyện)	--Piǎoliàn chējiān jìhuà
+	缸染车间计划 (暂不用) (Kế hoạch phân xưởng nhuộm máy - Tạm không dùng)	--Gāngrǎn chējiān jìhuà (zàn bùyòng)
+	染色车间计划 (Kế hoạch phân xưởng nhuộm)	--Rǎnsè chējiān jìhuà
+	印花车间计划 (Kế hoạch phân xưởng in hoa)	--Yìnhuā chējiān jìhuà
+	整理车间计划 (Kế hoạch phân xưởng hoàn tất/chỉnh lý)	--Zhěnglǐ chējiān jìhuà
++	回修管理 (Quản lý sửa chữa/hàng lỗi)	--Huíxiū guǎnlǐ
+	回修来源维护 (Bảo trì nguồn gốc hàng sửa chữa)	--Huíxiū láiyuán wéihù
+	回修类型维护 (Bảo trì loại hình sửa chữa)	--Huíxiū lèixíng wéihù
+	回修原因维护 (Bảo trì nguyên nhân sửa chữa)	--Huíxiū yuányīn wéihù
+	回修责任分类 (Phân loại trách nhiệm sửa chữa)	--Huíxiū zérèn fēnlèi
+	开回修卡 (Mở thẻ sửa chữa)	--Kāi huíxiū kǎ
+	回修卡工艺路线 (Quy trình công nghệ thẻ sửa chữa)	--Huíxiū kǎ gōngyì lùxiàn
+	打印流转卡(回修) (In thẻ luân chuyển - Hàng sửa chữa)	--Dǎyìn liúzhuǎnkǎ (huíxiū)
+	回修日报查询 (Truy vấn báo cáo ngày hàng sửa chữa)	--Huíxiū rìbào cháxún
+	回修卡风险评估 (Đánh giá rủi ro thẻ sửa chữa)	--Huíxiū kǎ fēngxiǎn pínggū
+	回修卡风险评估 (取消审核) (Đánh giá rủi ro thẻ sửa chữa - Hủy kiểm duyệt)	--Huíxiū kǎ fēngxiǎn pínggū (qǔxiāo shěnhé)
++	外协管理 (Quản lý gia công ngoài)	--Wàixié guǎnlǐ
+	外发结算类型 (Loại hình quyết toán gia công ngoài)	--Wàifā jiésuàn lèixíng
+	外协合同类别维护 (Bảo trì danh mục hợp đồng gia công ngoài)	--Wàixié hétóng lèibié wéihù
+	外协合同 (Hợp đồng gia công ngoài)	--Wàixié hétóng
+	外协合同 (取消审核) (Hợp đồng gia công ngoài - Hủy kiểm duyệt)	--Wàixié hétóng (qǔxiāo shěnhé)
+	关闭外协合同 (Đóng hợp đồng gia công ngoài)	--Guānbì wàixié hétóng
+	外协合同查询 (Truy vấn hợp đồng gia công ngoài)	--Wàixié hétóng cháxún
+	计划评审 (Đánh giá kế hoạch)	--Jìhuà píngshěn
+	计划评审查询 (Truy vấn đánh giá kế hoạch)	--Jìhuà píngshěn cháxún
+	设置订单工厂交期 (Thiết lập thời hạn giao hàng của nhà máy cho đơn hàng)	--Shèzhì dìngdān gōngchǎng jiāo qī
+	修改计划设置 (Sửa đổi thiết lập kế hoạch)	--Xiūgǎi jìhuà shèzhì
+++	生产作业PP - Vận hành sản xuất (PP)	--Shēngchǎn zuòyè PP
++	基础资料维护 (Bảo trì dữ liệu cơ bản)	--Jīchǔ zīliào wéihù
+	排班资料 (Dữ liệu phân ca trực)	--Páibān zīliào
+	班组资料维护 (Bảo trì dữ liệu tổ đội)	--Bānzǔ zīliào wéihù
+	员工资料维护 (Bảo trì dữ liệu nhân viên)	--Yuángōng zīliào wéihù
+	员工资料维护(漂炼车间) (Bảo trì nhân viên - Phân xưởng tẩy luyện)	--Yuángōng zīliào wéihù (piǎoliàn chējiān)
+	员工资料维护(印花车间) (Bảo trì nhân viên - Phân xưởng in hoa)	--Yuángōng zīliào wéihù (yìnhuā chējiān)
+	员工资料维护(缸染车间) (Bảo trì nhân viên - Phân xưởng nhuộm máy)	--Yuángōng zīliào wéihù (gāngrǎn chējiān)
+	员工资料维护(整理车间) (Bảo trì nhân viên - Phân xưởng hoàn tất)	--Yuángōng zīliào wéihù (zhěnglǐ chējiān)
+	员工资料维护(染色车间) (Bảo trì nhân viên - Phân xưởng nhuộm)	--Yuángōng zīliào wéihù (rǎnsè chējiān)
+	员工资料维护(其它车间) (Bảo trì nhân viên - Các phân xưởng khác)	--Yuángōng zīliào wéihù (qítā chējiān)
+	员工资料维护(成品车间) (Bảo trì nhân viên - Phân xưởng thành phẩm)	--Yuángōng zīliào wéihù (chéngpǐn chējiān)
+	班组与工序关系维护 (Bảo trì mối quan hệ giữa tổ đội và công đoạn)	--Bānzǔ yǔ gōngxù guānxì wéihù
++	车间产量进度 (Tiến độ sản lượng phân xưởng)	--Chējiān chǎnliàng jìndù
+	机台产量进度表 (Bảng tiến độ sản lượng theo máy)	--Jītái chǎnliàng jìndù biǎo
++	车间生产跟踪 (Theo dõi sản xuất phân xưởng)	--Chējiān shēngchǎn gēnzōng
+	车间生产跟踪(常规) (Theo dõi sản xuất - Thông thường)	--Chējiān shēngchǎn gēnzōng (chángguī)
+	车间生产跟踪(全工段) (Theo dõi sản xuất - Toàn bộ công đoạn)	--Chējiān shēngchǎn gēnzōng (quán gōngduàn)
++	车间生产跟踪(MES报工) (Theo dõi sản xuất - Báo cáo công việc MES)	--Chējiān shēngchǎn gēnzōng (MES bàogōng)
+	1号烧毛冷堆机-001 (Máy đốt lông ủ lạnh số 1)	--1 hào shāomáo lěngduījī-001
+	3号烧毛冷堆机-003 (Máy đốt lông ủ lạnh số 3)	--3 hào shāomáo lěngduījī-003
+	3#水洗机-005 (Máy giặt số 3)	--3# shuǐxǐjī-005
+	绳状水洗机-025 (Máy giặt dạng dây)	--Shéngzhuàng shuǐxǐjī-025
+	煮漂机085 (Máy nấu tẩy)	--Zhǔpiǎojī 085
+	滚筒烘干机048 (Máy sấy lồng quay)	--Gǔntǒng hōnggānjī 048
+	2#金刚砂磨毛机-045 (Máy mài lông đá mài số 2)	--2# jīngāngshā mómáojī-045
+	3#碳素磨毛机-131 (Máy mài lông carbon số 3)	--3# tàn sù mómáojī-131
+	1#起毛机-126 (Máy cào lông số 1)	--1# qǐmáo jī-126
+	1#碳素磨毛机-129 (Máy mài lông carbon số 1)	--1# tàn sù mómáojī-129
+	2#起毛机-127 (Máy cào lông số 2)	--2# qǐmáo jī-127
+	2#金刚砂磨毛机-045 (Máy mài lông đá mài số 2 - trùng lặp)	--2# jīngāngshā mómáojī-045
+	1号丝光机-007 (Máy bóng số 1)	--1 hào sīguāngjī-007
+	2号丝光机-008 (Máy bóng số 2)	--2 hào sīguāngjī-008
+	3号连续扎染联合机-011 (Máy liên hợp nhuộm ép liên tục số 3)	--3 hào liánxù zǎrǎn liánhéjī-011
+	2号连续扎染联合机-010 (Máy liên hợp nhuộm ép liên tục số 2)	--2 hào liánxù zǎrǎn liánhéjī-010
+	4号连续扎染联合机-012 (Máy liên hợp nhuộm ép liên tục số 4)	--4 hào liánxù zǎrǎn liánhéjī-012
+	1#圆网印花机-015 (Máy in lưới trục tròn số 1)	--1# yuánwǎng yìnhuājī-015
+	2#圆网印花机-016 (Máy in lưới trục tròn số 2)	--2# yuánwǎng yìnhuājī-016
+	3#圆网印花机-017 (Máy in lưới trục tròn số 3)	--3# yuánwǎng yìnhuājī-017
+	5#圆网印花机-019 (Máy in lưới trục tròn số 5)	--5# yuánwǎng yìnhuājī-019
+	1号蒸化机-021 (Máy hấp số 1)	--1 hào zhēnghuàjī-021
+	1号印花水洗机-023 (Máy giặt sau in số 1)	--1 hào yìnhuā shuǐxǐjī-023
+	2号印花水洗机-024 (Máy giặt sau in số 2)	--2 hào yìnhuā shuǐxǐjī-024
+	1#拉幅机-026 (Máy văng định hình số 1)	--1# lāfújī-026
+	2#拉幅机-027 (Máy văng định hình số 2)	--2# lāfújī-027
+	3#拉幅机-028 (Máy văng định hình số 3)	--3# lāfújī-028
+	5#拉幅机-029 (Máy văng định hình số 5)	--5# lāfújī-029
+	7#拉幅机-030 (Máy văng định hình số 7)	--7# lāfújī-030
+	8#拉幅机-031 (Máy văng định hình số 8)	--8# lāfújī-031
+	Airo-24-034 (Máy Airo-24)	--Airo-24-034
+	1号轧烘机-035 (Máy ép sấy số 1)	--1 hào zhàhōngjī-035
+	1号预缩机-037 (Máy tiền co số 1)	--1 hào yùsuōjī-037
+	2号预缩机-038 (Máy tiền co số 2)	--2 hào yùsuōjī-038
+	3号预缩机-039 (Máy tiền co số 3)	--3 hào yùsuōjī-039
+	缸染-072 (Nhuộm máy/Nhuộm gián đoạn)	--Gāngrǎn-072
+	砂洗-080 (Giặt cát)	--Shāxǐ-080
+	1#碱减量机-124 (Máy giảm trọng kiềm số 1)	--1# jiǎnjiǎnliàngjī-124
+	染色中段-096 (Giai đoạn giữa nhuộm)	--Rǎnsè zhōngduàn-096
+	焙烘机-014 (Máy sấy nướng/Máy trùng ngưng)	--Bèihòngjī-014
+	整理磨毛间-042 (Phòng mài lông hoàn tất)	--Zhěnglǐ mómáojiān-042
+	漂炼摆布间-1 (Phòng xếp vải tẩy luyện)	--Piǎoliàn bǎibùjiān-1
+	1#拉幅机(子窗显示) (Máy văng định hình số 1 - Hiển thị cửa sổ phụ)	--1# lāfújī (zǐ chuāng xiǎnshì)
+	MES报工(通用) (Báo cáo công việc MES - Chung)	--MES bàogōng (tōngyòng)
+	MES报工(退回+放行) (Báo cáo công việc MES - Trả về + Thông qua)	--MES bàogōng (退回+放行)
+	轧光机-040 (Máy cán bóng)	--Zhàguāngjī-040
++	相关查询 (Truy vấn liên quan)	--Xiāngguān cháxún
+	员工产量查询 (Truy vấn sản lượng nhân viên)	--Yuángōng chǎnliàng cháxún
+	在线库存统计(WIP) (Thống kê tồn kho trên chuyền - WIP)	--Zàixiàn kùcún tǒngjì (WIP)
+	工序放行查询 (Truy vấn thông qua công đoạn)	--Gōngxù fàngxíng cháxún
+	染色交付说明 (Hướng dẫn bàn giao nhuộm)	--Rǎnsè jiāofù shuōmíng
+	印花交付说明 (Hướng dẫn bàn giao in hoa)	--Yìnhuā jiāofù shuōmíng
+	车间交付(漂炼交付) (Bàn giao phân xưởng - Bàn giao tẩy luyện)	--Chējiān jiāofù (piǎoliàn jiāofù)
+	车间交付(染色交付) (已不用) (Bàn giao phân xưởng - Bàn giao nhuộm - Đã ngưng dùng)	--Chējiān jiāofù (rǎnsè jiāofù)
+	车间交付(印花交付) (已不用) (Bàn giao phân xưởng - Bàn giao in hoa - Đã ngưng dùng)	--Chējiān jiāofù (yìnhuā jiāofù)
+	车间交付(整理交付) (Bàn giao phân xưởng - Bàn giao hoàn tất)	--Chējiān jiāofù (zhěnglǐ jiāofù)
+	车间交付(机缸交付) (Bàn giao phân xưởng - Bàn giao máy nhuộm)	--Chējiān jiāofù (jīgāng jiāofù)
+	车间交付(砂洗交付) (Bàn giao phân xưởng - Bàn giao giặt cát)	--Chējiān jiāofù (shāxǐ jiāofù)
+	漂炼车间交付查询 (Truy vấn bàn giao phân xưởng tẩy luyện)	--Piǎoliàn chējiān jiāofù cháxún
+	染色车间交付查询 (Truy vấn bàn giao phân xưởng nhuộm)	--Rǎnsè chējiān jiāofù cháxún
+	印花车间交付查询 (Truy vấn bàn giao phân xưởng in hoa)	--Yìnhuā chējiān jiāofù cháxún
+	整理车间交付查询 (Truy vấn bàn giao phân xưởng hoàn tất)	--Zhěnglǐ chējiān jiāofù cháxún
+	缸染车间交付查询 (Truy vấn bàn giao phân xưởng nhuộm máy)	--Gāngrǎn chējiān jiāofù cháxún
+	印花车间待交付查询 (Truy vấn chờ bàn giao phân xưởng in hoa)	--Yìnhuā chējiān dài jiāofù cháxún
+	染色车间待交付查询 (Truy vấn chờ bàn giao phân xưởng nhuộm)	--Rǎnsè chējiān dài jiāofù cháxún
+++	质量管理QM/ - Quản lý chất lượng (QM)	--Zhìliàng guǎnlǐ QM
++	基础资料维护 (Bảo trì dữ liệu cơ bản)	--Jīchǔ zīliào wéihù
+	检验类型维护 (Bảo trì loại hình kiểm tra)	--Jiǎnyàn lèixíng wéihù
+	评分规则维护 (Bảo trì quy tắc chấm điểm)	--Píngfēn guīzé wéihù
++	 坯布抽检 (Lấy mẫu kiểm tra vải mộc)	--Pībù chōujiǎn
+	坯布抽检 (Lấy mẫu kiểm tra vải mộc)	--Pībù chōujiǎn
+	坯布抽检报告(查询) (Truy vấn báo cáo kiểm tra vải mộc)	--Pībù chōujiǎn bàogào (cháxún)
+	坯布物测抽检 (Lấy mẫu kiểm tra lý tính vải mộc)	--Pībù wù cè chōujiǎn
++	染化料抽检 (Lấy mẫu kiểm tra thuốc nhuộm & hóa chất)	--Rǎnhuàliào chōujiǎn
+	染化料抽样检测登记 (Đăng ký kiểm tra lấy mẫu thuốc nhuộm)	--Rǎnhuàliào chōuyàng jiǎncè dēngjì
+	染助剂抽样检测查询 (Truy vấn kiểm tra lấy mẫu trợ chất ngành nhuộm)	--Rǎn zhùjì chōuyàng jiǎncè cháxún
++	成品检验 (Kiểm tra thành phẩm)	--Chéngpǐn jiǎnyàn
++	基础资料维护 (Bảo trì dữ liệu cơ bản)	--Jīchǔ zīliào wéihù
+	回修类型[检验] (Loại hình sửa chữa [Kiểm tra])	--Huíxiū lèixíng [jiǎnyàn]
+	疵点责任部门 (Bộ phận chịu trách nhiệm về lỗi/khuyết tật)	--Cìdiǎn zérèn bùmén
+	成品布疵点信息 (Thông tin lỗi vải thành phẩm)	--Chéngpǐnbù cìdiǎn xìnxī
+	回修备注维护 (Bảo trì ghi chú sửa chữa)	--Huíxiū bèizhù wéihù
+	检验备注维护(串) (Bảo trì ghi chú kiểm tra)	--Jiǎnyàn bèizhù wéihù (chuàn)
+	成品标签打印(修改) (In nhãn thành phẩm - Sửa đổi)	--Chéngpǐn biāoqiàn dǎyìn (xiūgǎi)
+	成品标签打印 (In nhãn thành phẩm)	--Chéngpǐn biāoqiàn dǎyìn
++	 测试管理 (Quản lý thử nghiệm)	--Cèshì guǎnlǐ
++	基础资料维护 (Bảo trì dữ liệu cơ bản)	--Jīchǔ zīliào wéihù
+	测试种类维护 (Bảo trì loại hình thử nghiệm)	--Cèshì zhǒnglèi wéihù
+	测试员组别维护 (Bảo trì nhóm nhân viên thử nghiệm)	--Cèshìyuán zǔbié wéihù
+	测试人员维护 (Bảo trì nhân sự thử nghiệm)	--Cèshì rényuán wéihù
++	成品布测试 (Thử nghiệm vải thành phẩm)	--Chéngpǐnbù cèshì
++	基础资料维护 (Bảo trì dữ liệu cơ bản)	--Jīchǔ zīliào wéihù
+	测试项目维护 (Bảo trì hạng mục thử nghiệm)	--Cèshì xiàngmù wéihù
+	测试标准维护 (Bảo trì tiêu chuẩn thử nghiệm)	--Cèshì biāozhǔn wéihù
+	测试任务管理 (Quản lý nhiệm vụ thử nghiệm)	--Cèshì rènwù guǎnlǐ
+	测试任务计划 (Kế hoạch nhiệm vụ thử nghiệm)	--Cèshì rènwù jìhuà
+	测试结果输入 (Nhập kết quả thử nghiệm)	--Cèshì jiéguǒ shūrù
+	测试结果评定 (Đánh giá kết quả thử nghiệm)	--Cèshì jiéguǒ píngdìng
+	测试结果查询 (Truy vấn kết quả thử nghiệm)	--Cèshì jiéguǒ cháxún
+	成品测试结果查询(新) (Truy vấn kết quả thử nghiệm thành phẩm - Mới)	--Chéngpǐn cèshì jiéguǒ cháxún (xīn)
+	质量问题联系单 (Phiếu liên lạc vấn đề chất lượng)	--Zhìliàng wèntí liánxìdān
+	质量问题联系单汇总查询 (Truy vấn tổng hợp phiếu liên lạc vấn đề chất lượng)	--Zhìliàng wèntí liánxìdān huìzǒng cháxún
+	设定联系结果(业务) (Thiết lập kết quả liên lạc - Nghiệp vụ)	--Shèdìng liánxì jiéguǒ (yèwù)
+	QA测试中心放行单 (Phiếu thông qua của trung tâm thử nghiệm QA)	--QA cèshì zhōngxīn fàngxíngdān
+	QA放行单 (Phiếu thông qua QA)	--QA fàngxíngdān
+++	物流管理MM/Quan ly XNK - Quản lý hậu cần (MM)	--Wùliú guǎnlǐ MM
++	基础资料维护 (Bảo trì dữ liệu cơ bản)	--Jīchǔ zīliào wéihù
+	    仓库维护 (Bảo trì kho hàng)	--Cāngkù wéihù
+	    配置入库单 (Cấu hình phiếu nhập kho)	--Pèizhì rùkùdān
+	    配置出库单 (Cấu hình phiếu xuất kho)	--Pèizhì chūkùdān
+	    供应商管理 (Quản lý nhà cung cấp)	--Gōngyìngshāng guǎnlǐ
+	    供应商管理(物料关系维护) (Quản lý nhà cung cấp - Bảo trì quan hệ vật tư)	--Gōngyìngshāng guǎnlǐ (wùliào guānxì wéihù)
+	    供应商查询 (Truy vấn nhà cung cấp)	--Gōngyìngshāng cháxún
+	    染化料库存类型 (Loại tồn kho thuốc nhuộm/hóa chất)	--Rǎnhuàliào kùcún lèixíng
+	    坯布库存类型 (Loại tồn kho vải mộc)	--Pībù kùcún lèixíng
+	    半制品仓库库存类型 (Loại tồn kho kho bán thành phẩm)	--Bànzhìpǐn cāngkù kùcún lèixíng
+	    成品仓库库存类型 (Loại tồn kho kho thành phẩm)	--Chéngpǐn cāngkù kùcún lèixíng
++	物料维护 (Bảo trì vật tư)	--Wùliào wéihù
+	    经纱纱支前缀 (Tiền tố chi số sợi dọc)	--Jīngshā shāzhī qiánzhuì
+	    经纱纱支 (Chi số sợi dọc)	--Jīngshā shāzhī
+	    经纱纱支后缀 (Hậu tố chi số sợi dọc)	--Jīngshā shāzhī hòuzhuì
+	    纬纱纱支前缀 (Tiền tố chi số sợi ngang)	--Wěishā shāzhī qiánzhuì
+	    纬纱纱支 (Chi số sợi ngang)	--Wěishā shāzhī
+	    纬纱纱支后缀 (Hậu tố chi số sợi ngang)	--Wěishā shāzhī hòuzhuì
+	    品种0 / 1 / 2 (Chủng loại 0 / 1 / 2)	--Pǐnzhǒng 0 / 1 / 2
+	    物料类别维护 (Bảo trì danh mục vật tư)	--Wùliào lèibié wéihù
+	    物料维护(纱/坯布/成品布/五金/染化料) (Bảo trì vật tư Sợi/Vải mộc/Thành phẩm/Ngũ kim/Hóa chất)	--Wùliào wéihù (shā/pībù/chéngpǐnbù/wǔjīn/rǎnhuàliào)
+	    物料查询 (Truy vấn vật tư)	--Wùliào cháxún
+	    物料成分 (Thành phần vật tư)	--Wùliào chéngfèn
++	采购管理 (Quản lý thu mua)	--Cǎigòu guǎnlǐ
+	    请购单 (Phiếu yêu cầu mua hàng)	--Qǐnggòudān
+	        请购单录入 (Nhập phiếu yêu cầu)	--Qǐnggòudān lùrù
+	        请购单查询 (Truy vấn phiếu yêu cầu)	--Qǐnggòudān cháxún
+	        请购单审核 (Phê duyệt phiếu yêu cầu)	--Qǐnggòudān shěnhé
+	    基础资料维护 (Bảo trì dữ liệu cơ bản - Thu mua)	--Jīchǔ zīliào wéihù
+	        采购条款维护 (Bảo trì điều khoản mua hàng)	--Cǎigòu tiáokuǎn wéihù
+	        付款方式维护 (Bảo trì phương thức thanh toán)	--Fùkuǎn fāngshì wéihù
+	    采购单 (Đơn mua hàng)	--Cǎigòudān
+	        采购单录入 (Nhập đơn mua hàng)	--Cǎigòudān lùrù
+	        采购单查询 (Truy vấn đơn mua hàng)	--Cǎigòudān cháxún
+	        采购单变更 (Thay đổi đơn mua hàng)	--Cǎigòudān biàngēng
+	    预收管理 (Quản lý dự thu/tạm ứng)	--Yùshōu guǎnlǐ
+	        预收款项 (Khoản dự thu/tạm ứng)	--Yùshōukuǎn xiàng
+	        预收单查询 (Truy vấn phiếu dự thu)	--Yùshōudān cháxún
+	    坯布/五金/染化料申购进度查询 (Truy vấn tiến độ yêu cầu mua Vải mộc/Ngũ kim/Hóa chất)	--Pībù/wǔjīn/rǎnhuàliào shěngòu jìndù cháxún
+	    历史坯布采购记录查询 (Truy vấn lịch sử mua vải mộc)	--Lìshǐ pībù cǎigòu jìlù cháxún
+	    纱价维护 (Bảo trì giá sợi)	--Shā jià wéihù
+	    坯价估算(永新) (Ước tính giá vải mộc)	--Pī jià gǔsuàn (Yǒngxīn)
+	    纱支资料 (Dữ liệu chi số sợi)	--Shā zhī zīliào
++	半制品仓 (Kho bán thành phẩm)	--Bànzhìpǐn cāng
+	    01基础资料 (01 Dữ liệu cơ bản)	--01 jīchǔ zīliào
+	        01货位 / 02月报项目 / 03货龄表项目 / 04仓管员	--01 huòwèi / 02 yuèbào xiàngmù / 03 huòlíng biǎo xiàngmù / 04 cāngguǎnyuán
+	    02业务 (02 Nghiệp vụ)	--02 yèwù
+	        01车间/委外生产入库 (Nhập kho sản xuất tại xưởng/gia công ngoài)	--01 chējiān/wěiwài shēngchǎn rùkù
+	        01入库 / 02出库 / 02投坯出库 (Nhập/Xuất/Xuất cấp liệu)	--01 rùkù / 02 chūkù / 02 tóu pī chūkù
+	        03确认入库 / 05确认出库 (Xác nhận nhập/xuất kho)	--03 quèrèn rùkù / 05 quèrèn chūkù
+	        04取消入库 / 06取消出库 (Hủy nhập/xuất kho)	--04 qǔxiāo rùkù / 06 qǔxiāo chūkù
+	    03库存 (03 Tồn kho)	--03 kùcún
+	        半制品仓更改库位 (Thay đổi vị trí kho bán thành phẩm)	--Bànzhìpǐn cāng gēnggǎi kùwèi
+	        01存货盘点 / 02修改货位 / 03拆分合并条码 (Kiểm kê/Sửa vị trí/Mã vạch)	--01 cúnhuò pándiǎn / 02 xiūgǎi huòwèi / 03 chāifēn hébìng tiáomǎ
+	    04报表 (04 Báo cáo)	--04 bàobiǎo
+	        01收付存月报 / 03库存分析图 / 04入出库走势图 (Báo cáo tháng/Đồ thị tồn kho)	--01 shōufùcún yuèbào / 03 kùcún fēnxī tú / 04 rù chūkù zǒushì tú
+	        05月报表审核 / 05半制品进仓报表 (Phê duyệt/Báo cáo nhập kho)	--05 yuèbàobiǎo shěnhé / 05 bànzhìpǐn jìn cāng bàobiǎo
+	    05查询 (05 Truy vấn)	--05 cháxún
+	        半制品入库/出库/库存查询 (Truy vấn Nhập/Xuất/Tồn bán thành phẩm)	--Bànzhìpǐn rùkù/chūkù/kùcún cháxún
+	        01查询入库单 / 02查询出库单 / 03查询明细库存 (Truy vấn phiếu chi tiết)	--01 cháxún rùkùdān / 02 cháxún chūkùdān / 03 cháxún míngxì kùcún
++	坯布仓库 / 弘新坯布仓库 (Kho vải mộc)	--Pībù cāngkù / Hóngxīn pībù cāngkù
+	    01基础资料 (01 Dữ liệu cơ bản)	--01 jīchǔ zīliào
+	        01货位 / 04仓管员 / 05坯布进仓颜色 (Vị trí/Thủ kho/Màu sắc nhập)	--01 huòwèi / 04 cāngguǎnyuán / 05 pībù jìn cāng yánsè
+	    02业务 (02 Nghiệp vụ)	--02 yèwù
+	        01采购/来料加工入库 (Nhập kho mua hàng/gia công)	--01 cǎigòu/láiliào jiāgōng rùkù
+	        02销售出库 / 02投坯出库 / 02采购退货出库 (Xuất kho bán/cấp liệu/trả hàng)	--02 xiāoshòu chūkù / 02 tóu pī chūkù / 02 cǎigòu tuìhuò chūkù
+	        07金额处理 / 坯布入出库冲账登记 (Xử lý số tiền/Bù trừ công nợ)	--07 jīn'é chǔlǐ / pībù rù chūkù chōngzhàng dēngjì
+	    03库存 (03 Tồn kho)	--03 kùcún
+	        坯布仓更改库位 / 01存货盘点 / 03拆分合并条码	--Pībù cāng gēnggǎi kùwèi / 01 cúnhuò pándiǎn / 03 chāifēn hébìng tiáomǎ
+	    05查询 (05 Truy vấn)	--05 cháxún
+	        坯布进销存明细表 / 坯布安全库存预警查询 (Bảng chi tiết/Cảnh báo an toàn)	--Pībù jìn xiāo cún míngxìbiǎo / pībù ānquán kùcún yùjǐng cháxún
+	        更改坯布入库单物料 / 更改坯布入库信息 (Sửa thông tin nhập kho)	--Gēnggǎi pībù rùkùdān wùliào / gēnggǎi pībù rùkù xìnxī
++	成品仓库 / 成品办单仓 / 成品开发仓 (Hệ thống kho thành phẩm)	--Chéngpǐn cāngkù / Chéngpǐn bàndān cāng / Chéngpǐn kāifā cāng
+	    01基础资料 (01 Dữ liệu cơ bản)	--01 jīchǔ zīliào
+	        01货位 / 04仓管员 (Vị trí hàng/Thủ kho)	--01 huòwèi / 04 cāngguǎnyuán
+	    02业务 (02 Nghiệp vụ)	--02 yèwù
+	        01车间/委外/转单入库 (Nhập kho từ xưởng/gia công/chuyển đơn)	--01 chējiān/wěiwài/zhuǎndān rùkù
+	        01船样入库 / 02销售出库 / 02船样出库 (Nhập mẫu tàu/Xuất bán hàng)	--01 chuányàng rùkù / 02 xiāoshòu chūkù / 02 chuányàng chūkù
+	        03确认入库 / 05确认出库 / 06取消出库 (Xác nhận/Hủy phiếu)	--03 quèrèn rùkù / 05 quèrèn chūkù / 06 qǔxiāo chūkù
+	    03库存 (03 Tồn kho)	--03 kùcún
+	        贸易单超上限入库解锁 (Mở khóa nhập kho vượt định mức)	--Màoyìdān chāo shàngxiàn rùkù jiěsuǒ
+	        成品更改库位 / 01存货盘点 / 04成品盘点单 (Sửa vị trí/Kiểm kê)	--Chéngpǐn gēnggǎi kùwèi / 01 cúnhuò pándiǎn / 04 chéngpǐn pándiǎndān
+	    05查询 (05 Truy vấn)	--05 cháxún
+	        成品入库(LOT/等级/B布) (Nhập kho theo Lô/Cấp độ/Vải loại B)	--Chéngpǐn rùkù (LOT/děngjí/B bù)
+	        成品进销存汇总表 / 销售明细查询 (Bảng tổng hợp/Chi tiết bán hàng)	--Chéngpǐn jìn xiāo cún huìzǒngbiǎo / xiāoshòu míngxì cháxún
++	染化料仓库 (Kho thuốc nhuộm và hóa chất)	--Rǎnhuàliào cāngkù
+	    01基础资料 (01 Dữ liệu cơ bản)	--01 jīchǔ zīliào
+	        01货位 / 02月报项目 / 04仓管员 (Vị trí/Báo cáo tháng/Thủ kho)	--01 huòwèi / 02 yuèbào xiàngmù / 04 cāngguǎnyuán
+	    02业务 (02 Nghiệp vụ)	--02 yèwù
+	        01采购入库 / 02调拨出库 / 01入库 / 02出库 (Nhập mua/Điều chuyển)	--01 cǎigòu rùkù / 02 diàobó chūkù / 01 rùkù / 02 chūkù
+	    03库存 (03 Tồn kho)	--03 kùcún
+	        染化料仓更改库位 / 01存货盘点 / 03拆分合并条码	--Rǎnhuàliào cāng gēnggǎi kùwèi / 01 cúnhuò pándiǎn / 03 chāifēn hébìng tiáomǎ
+	    05查询 (05 Truy vấn)	--05 cháxún
+	        染化料进销存汇总表 / 染料收发存(金额) (Tổng hợp Nhập-Xuất-Tồn)	--Rǎnhuàliào jìn xiāo cún huìzǒngbiǎo / rǎnliào shōufācún (jīn'é)
+	        染化料助剂耗用报表 / 安全库存预警查询 (Báo cáo tiêu hao/Cảnh báo an toàn)	--Rǎnhuàliào zhùjì hàoyòng bàobiǎo / ānquán kùcún yùjǐng cháxún
++	二级仓库 (Hệ thống kho cấp 2 - Xưởng)	--Èr jí cāngkù
+	    漂炼 / 染色 / 印花 / 缸染 / 整理 / 污水 / 辅助 二级仓库	--Piǎoliàn / Rǎnsè / Yìnhuā / Gāngrǎn / Zhěnglǐ / Wūshuǐ / Fùzhù èr jí cāngkù
+	        02业务: 01入库 / 02出库 / 07扫描出库 / 08领料单 (Nghiệp vụ Nhập/Xuất/Quét mã)	--02 yèwù: 01 rùkù / 02 chūkù / 07 sǎomiáo chūkù / 08 lǐngliàodān
+	        03库存: 01存货盘点 (Kiểm kê tồn kho)	--03 kùcún: 01 cúnhuò pándiǎn
+	    二级仓库查询 (Truy vấn kho cấp 2)	--Èr jí cāngkù cháxún
+	        二级仓入库/出库/库存查询 (Tra cứu Nhập/Xuất/Tồn kho xưởng)	--Èr jí cāng rùkù/chūkù/kùcún cháxún
+	        二级仓收发存汇总表(金额) (Bảng tổng hợp theo số tiền)	--Èr jí cāng shōufācún huìzǒngbiǎo (jīn'é)
++	五金仓库 (Kho ngũ kim)	--Wǔjīn cāngkù
+	    01基础资料 (01 Dữ liệu cơ bản)	--01 jīchǔ zīliào
+	        01货位 / 04仓管员 / 05五金出库用途 (Vị trí/Thủ kho/Mục đích xuất)	--01 huòwèi / 04 cāngguǎnyuán / 05 wǔjīn chūkù yòngtù
+	    02领用申请 (02 Yêu cầu lĩnh dùng)	--02 lǐngyòng shēnqǐng
+	        五金领料单 / 行政领料单 (Phiếu lĩnh ngũ kim/Hành chính)	--Wǔjīn lǐngliàodān / xíngzhèng lǐngliàodān
+	    03业务 (03 Nghiệp vụ)	--03 yèwù
+	        01采购入库 / 01入库 / 02出库 / 02领用出库 (Nhập mua/Nhập kho/Xuất lĩnh dùng)	--01 cǎigòu rùkù / 01 rùkù / 02 chūkù / 02 lǐngyòng chūkù
+	    06查询 (06 Truy vấn)	--06 cháxún
+	        五金收发存(金额) / 生产领用汇总 / 安全库存预警 (Tổng hợp tiền/Tiêu hao/An toàn)	--Wǔjīn shōufācún (jīn'é) / shēngchǎn lǐngyòng huìzǒng / ānquán kùcún yùjǐng
++	旧品仓库 / 镍网报废仓库 / 外协仓库 (Kho đồ cũ, phế liệu, gia công ngoài)	--Jiùpǐn cāngkù / Nièwǎng bàofèi cāngkù / Wàixié cāngkù
+	    01基础资料 (01 Dữ liệu cơ bản)	--01 jīchǔ zīliào
+	        05旧品/镍网报废出库用途 (Mục đích xuất đồ cũ/báo phế)	--05 jiùpǐn/nièwǎng bàofèi chūkù yòngtù
+	    02业务 / 03库存 / 04报表 (Nghiệp vụ/Kiểm kê/Báo cáo tháng)	--02 yèwù / 03 kùcún / 04 bàobiǎo
+	    05查询 (05 Truy vấn)	--05 cháxún
+	        进销存汇总表 / 生产领用汇总/明细查询 (Tổng hợp/Chi tiết lĩnh dùng)	--Jìn xiāo cún huìzǒngbiǎo / shēngchǎn lǐngyòng huìzǒng/míngxì cháxún
+++	单证管理IE - Quản lý tài liệu (IE)	--Dānjù guǎnlǐ IE
++	基础资料维护 - Bảo trì dữ liệu cơ sở	--Jīchǔ zīliào wéihù
+	银行维护 - Bảo trì ngân hàng	--Yínháng wéihù
+	港口维护 - Bảo trì cảng biển	--Gǎngkǒu wéihù
+	信用证文件管理 - Quản lý chứng từ thư tín dụng	--Xìnyòngzhèng wénjiàn guǎnlǐ
++	出口管理 - Quản lý xuất khẩu	--Chūkǒu guǎnlǐ
++	信用证查询 - Truy vấn thư tín dụng	--Xìnyòngzhèng cháxún
++	信用证管理(新版) - Quản lý thư tín dụng (Phiên bản mới)	--Xìnyòngzhèng guǎnlǐ (xīnbǎn)
+++	财务管理FI - Quản lý tài chính FI	--Cáiwù guǎnlǐ FI
++	基础资料维护 - Bảo trì dữ liệu cơ sở	--Jīchǔ zīliào wéihù
+	发票类型 - Loại hóa đơn	--Fāpiào lèixíng
+	会计期间维护 - Bảo trì kỳ kế toán	--Kuàijì qījiān wéihù
+	应收应付类型 - Loại khoản phải thu/phải trả	--Yìngshōu yìngfù lèixíng
+	应收收汇方式 - Phương thức thu ngoại tệ/phải thu	--Yìngshōu shōuhuì fāngshì
+	客户信用额度管理 - Quản lý hạn mức tín dụng khách hàng	--Kèhù xìnyòng édù guǎnlǐ
+	客户信用额度查询 - Truy vấn hạn mức tín dụng khách hàng	--Kèhù xìnyòng édù cháxún
+	版费特殊要求 - Yêu cầu đặc biệt về phí bản in	--Bǎnfèi tèshū yāoqiú
+	费用类型维护 - Bảo trì loại chi phí	--Fèiyòng lèixíng wéihù
+	银行账号维护 - Bảo trì số tài khoản ngân hàng	--Yínháng zhànghào wéihù
+	能源单价维护 - Bảo trì đơn giá năng lượng	--Néngyuán dānjià wéihù
++	应付管理 - Quản lý khoản phải trả	--Yìngfù guǎnlǐ
+	登记凭证 - Đăng ký chứng từ	--Dēngjì píngzhèng
+	应付发票 - Hóa đơn phải trả	--Yìngfù fāpiào
+	付款费用管理 - Quản lý chi phí thanh toán	--Fùkuǎn fèiyòng guǎnlǐ
+	应付款核销 - Quyết toán/đối trừ khoản phải trả	--Yìngfùkuǎn héxiāo
+	应付款查询 - Truy vấn khoản phải trả	--Yìngfùkuǎn cháxún
+	应付款对账单 - Đối chiếu công nợ phải trả	--Yìngfùkuǎn duìzhàngdān
++	应收管理 - Quản lý khoản phải thu	--Yìngshōu guǎnlǐ
+	登记凭证 - Đăng ký chứng từ	--Dēngjì píngzhèng
+	凭证审核 - Phê duyệt chứng từ	--Píngzhèng shěnhé
+	应收款核销 - Quyết toán/đối trừ khoản phải thu	--Yìngshōukuǎn héxiāo
+	应收款查询 - Truy vấn khoản phải thu	--Yìngshōukuǎn cháxún
+	应收款对账单 - Đối chiếu công nợ phải thu	--Yìngshōukuǎn duìzhàngdān
+	应收到期提醒 - Nhắc nhở khoản phải thu đến hạn	--Yìngshōu dàoqī tíxǐng
+	生产业务加工费 - Phí gia công nghiệp vụ sản xuất	--Shēngchǎn yèwù jiāgōngfèi
+++	设备管理EM - Quản lý thiết bị EM	--Shèbèi guǎnlǐ EM
+	基础资料维护 - Bảo trì dữ liệu cơ sở	--Jīchǔ zīliào wéihù
+	设备类别维护 - Bảo trì loại thiết bị	--Shèbèi lèibié wéihù
+	设备型号维护 - Bảo trì mã/đời thiết bị	--Shèbèi xínghào wéihù
+	设备信息维护 - Bảo trì thông tin thiết bị	--Shèbèi xìnxī wéihù
+	设备与工序关系维护 - Bảo trì mối quan hệ giữa thiết bị và công đoạn	--Shèbèi yǔ gōngxù guānxì wéihù
+	机台水电汽理论消耗系数维护 - Bảo trì hệ số tiêu hao lý thuyết điện, nước, hơi của máy móc	--Jītái shuǐdiànqì lǐlùn xiāohào xìshù wéihù
+++	 人力资源HR - Nhân sự (HR)	--Rénlì zīyuán HR
+	基础资料维护 - Bảo trì dữ liệu cơ sở	--Jīchǔ zīliào wéihù
+	部门信息维护 - Bảo trì thông tin bộ phận	--Bùmén xìnxī wéihù
+	人事档案维护 - Bảo trì hồ sơ nhân sự	--Rénshì dàng'àn wéihù
+	人事资料维护 - Bảo trì dữ liệu nhân sự	--Rénshì zīliào wéihù
+++	 电子审批EA/Phe duyet dien tu - Hệ thống phê duyệt điện tử (EA)	--Diànzǐ shěnpī EA
+	01基础资料 - 01 Dữ liệu cơ sở	--01 jīchǔ zīliào
+	01单据类别 - 01 Loại chứng từ	--01 dānjù lèibié
+	04审批角色 - 04 Vai trò phê duyệt	--04 shěnpī juésè
+	05审批流程 - 05 Quy trình phê duyệt	--05 shěnpī liúchéng
+	02电子审批2 - 02 Phê duyệt điện tử 2	--02 diànzǐ shěnpī 2
+	04查询审批历史记录 - 04 Tra cứu lịch sử phê duyệt	--04 cháxún shěnpī lìshǐ jìlù
+++	企业扩展平台EEP - Nền tảng mở rộng doanh nghiệp EEP	--Qǐyè kuòzhǎn píngtái EEP
+	业务流程BF - Quy trình nghiệp vụ BF	--Yèwù liúchéng BF
+	永新导航图 - Sơ đồ điều hướng Vĩnh Tân	--Yǒngxīn dǎohángtú
+	单据中心NC - Trung tâm chứng từ NC	--Dānjù zhōngxīn NC
+	单据公式项目 - Mục công thức chứng từ	--Dānjù gōngshì xiàngmù
+	单据编码规则 - Quy tắc mã hóa chứng từ	--Dānjù biāomǎ guīzé
+	查询中心QC - Trung tâm truy vấn QC	--Cháxún zhōngxīn QC
+	查询菜单维护 - Bảo trì menu truy vấn	--Cháxún càidān wéihù
+	查询管理(系统) - Quản lý truy vấn (Hệ thống)	--Cháxún guǎnlǐ (xìtǒng)
+	数据字典DC - Từ điển dữ liệu DC	--Shùjù zìdiǎn DC
+	通用字典类型维护 - Bảo trì loại từ điển thông dụng	--Tōngyòng zìdiǎn lèixíng wéihù
+	系统字典数据维护 - Bảo trì dữ liệu từ điển hệ thống	--Xìtǒng zìdiǎn shùjù wéihù
+	字典菜单维护 - Bảo trì menu từ điển	--Zìdiǎn càidān wéihù
+++	 PMC进度查询 - Truy vấn tiến độ PMC	--PMC jìndù cháxún
+	圆网入库查询 - Truy vấn nhập kho lưới tròn	--Yuánwǎng rùkù cháxún
+	圆网入库统计查询 - Truy vấn thống kê nhập kho lưới tròn	--Yuánwǎng rùkù tǒngjì cháxún
+	开生产卡查询 - Truy vấn mở thẻ sản xuất	--Kāi shēngchǎn kǎ cháxún
+	冷堆堆置时间查询 - Truy vấn thời gian ủ lạnh (vải/nhuộm)	--Lěngduī duīzhì shíjiān cháxún
+	印花水洗浓度查询 - Truy vấn nồng độ giặt in hoa	--Yìnhuā shuǐxǐ nóngdù cháxún
+	印花处方录入情况查询 - Truy vấn tình trạng nhập liệu công thức in hoa	--Yìnhuā chǔfāng lùrù qíngkuàng cháxún
+	SO进度跟踪查询 - Truy vấn theo dõi tiến độ SO (Sales Order)	--SO jìndù gēnzōng cháxún
+	小网费用统计查询 - Truy vấn thống kê chi phí lưới nhỏ	--Xiǎo wǎng fèiyòng tǒngjì cháxún
+	工卡进度查询 - Truy vấn tiến độ thẻ công đoạn (Work Card)	--Gōngkǎ jìndù cháxún
+++	份综合查询 - Truy vấn toàn diện	--Fèn zōnghé cháxún
++	财务类查询 - Truy vấn loại tài chính	--Cáiwù lèi cháxún
+	技术处方查询 - Truy vấn công thức kỹ thuật	--Jìshù chǔfāng cháxún
+	订单跟踪查询 - Truy vấn theo dõi đơn hàng	--Dìngdān gēnzōng cháxún
+	成品库存查询 (含成本) - Truy vấn tồn kho thành phẩm (bao gồm giá vốn)	--Chéngpǐn kùcún cháxún (hán chéngběn)
+	成品出库查询 (含成本) - Truy vấn xuất kho thành phẩm (bao gồm giá vốn)	--Chéngpǐn chūkù cháxún (hán chéngběn)
+	应收余额查询 - Truy vấn số dư khoản phải thu	--Yìngshōu yú'é cháxún
+	订单染化料用量查询 - Truy vấn lượng sử dụng thuốc nhuộm và hóa chất theo đơn hàng	--Dìngdān rǎnhuàliào yòngliàng cháxún
+	订单PS查询 - Truy vấn PS đơn hàng	--Dìngdān PS cháxún
+	成品出库查询(金额)(全) - Truy vấn xuất kho thành phẩm (số tiền) (tất cả)	--Chéngpǐn chūkù cháxún (jīn'é) (quán)
+	出库未开票 - Xuất kho chưa xuất hóa đơn	--Chūhuò wèi kāipiào
+	成本日报 - Báo cáo chi phí hàng ngày	--Chéngběn rìbào
+	成本日报-越南 - Báo cáo chi phí hàng ngày - Việt Nam	--Chéngběn rìbào - Yuènán
+	YX坯布收发存报表 - Báo cáo nhập-xuất-tồn vải mộc YX	--YX pībù shōufācún bàobiǎo
+	生产入库金额表 - Bảng số tiền sản xuất nhập kho	--Shēngchǎn rùkù jīn'é biǎo
+	订单工序查询 - Truy vấn công đoạn đơn hàng	--Dìngdān gōngxù cháxún
+	订单评审查询(财务) - Truy vấn đánh giá đơn hàng (tài chính)	--Dìngdān píngshěn cháxún (cáiwù)
+	杂收杂发比对 - Đối chiếu thu chi khác	--Zá shōu zá fā bǐduì
+	用友卡接口数据 - Dữ liệu giao diện thẻ Yonyou (Yongyou)	--Yòngyǒu kǎ jiēkǒu shùjù
++	仓库类查询 - Truy vấn kho	--Cāngkù lèi cháxún
+	上坯通知单QMS检测结果查询 - Truy vấn kết quả kiểm tra QMS đơn thông báo nhập vải mộc	--Shàng pī tōngzhīdān QMS jiǎncè jiéguǒ cháxún
+	成品入库查询(GB布) - Truy vấn nhập kho thành phẩm (Vải GB)	--Chéngpǐn rùkù cháxún (GB bù)
+	坯布入库一个月未出库 - Vải mộc nhập kho một tháng chưa xuất	--Pībù rùkù yī gè yuè wèi chūkù
+	成品入库一个月未出库 - Thành phẩm nhập kho một tháng chưa xuất	--Chéngpǐn rùkù yī gè yuè wèi chūkù
+	染化料入库一个半月未出库 - Thuốc nhuộm/hóa chất nhập kho một tháng rưỡi chưa xuất	--Rǎnhuàliào rùkù yī gè bàn yuè wèi chūkù
+	成品入库(分单查询) - Nhập kho thành phẩm (Truy vấn theo đơn)	--Chéngpǐn rùkù (fēn dān cháxún)
+	成品库存查询(永新) - Truy vấn tồn kho thành phẩm (Vĩnh Tân)	--Chéngpǐn kùcún cháxún (Yǒngxīn)
++	销售类查询 - Truy vấn kinh doanh/bán hàng	--Xiāoshòu lèi cháxún
+	排产库存查询 - Truy vấn tồn kho theo kế hoạch sản xuất	--Pái chǎn kùcún cháxún
+	成品布物测结果查询 - Truy vấn kết quả đo lường vải thành phẩm	--Chéngpǐn bù wù cè jiéguǒ cháxún
+	订单毛利率 - Tỷ suất lợi nhuận gộp đơn hàng	--Dìngdān máolìlǜ
+	订单损耗率 - Tỷ lệ hao hụt đơn hàng	--Dìngdān sǔnhàolǜ
+	成品入库汇总查询 (本厂生产) - Truy vấn tổng hợp nhập kho thành phẩm (Sản xuất tại xưởng này)	--Chéngpǐn rùkù huìzǒng cháxún (běn chǎng shēngchǎn)
+	成品验布汇总查询 - Truy vấn tổng hợp kiểm vải thành phẩm	--Chéngpǐn yàn bù huìzǒng cháxún
+	车间刷卡查询 - Truy vấn quét thẻ tại xưởng	--Chējiān shuākǎ cháxún
+	流程卡回修情况查询 - Truy vấn tình trạng sửa hàng của thẻ quy trình	--Liúchéngkǎ huíxiū qíngkuàng cháxún
+	销售订单查询(价格) - Truy vấn đơn hàng bán (Giá)	--Xiāoshòu dìngdān cháxún (jiàgé)
+	计划订单查询 - Truy vấn đơn hàng kế hoạch	--Jìhuà dìngdān cháxún
+	下发查询(业务) - Truy vấn thông tin ban hành/giao việc (Nghiệp vụ)	--Xiàfā cháxún (yèwù)
+	客户码单 - Bảng mã khách hàng	--Kèhù mǎdān
+	按销售组别分析 - Phân tích theo nhóm kinh doanh	--Àn xiāoshòu zǔbié fēnxī
+	订单评审查询(业务) - Truy vấn đánh giá/phê duyệt đơn hàng (Nghiệp vụ)	--Dìngdān píngshěn cháxún (yèwù)
+	订单排机查询 - Truy vấn sắp xếp máy chạy đơn hàng	--Dìngdān pái jī cháxún
++	生产类查询 - Truy vấn sản xuất	--Shēngchǎn lèi cháxún
+	订单工序产量查询 - Truy vấn sản lượng theo công đoạn đơn hàng	--Dìngdān gōngxù chǎnliàng cháxún
+	卡工艺比对查询 - Truy vấn đối chiếu quy trình trên thẻ	--Kǎ gōngyì bǐduì cháxún
+	流程卡工序产量分析 - Phân tích sản lượng công đoạn theo thẻ quy trình	--Liúchéngkǎ gōngxù chǎnliàng fēnxī
+	卡回修查询 - Truy vấn sửa hàng (từ thẻ)	--Kǎ huíxiū cháxún
+	订单生产情况查询 - Truy vấn tình hình sản xuất đơn hàng	--Dìngdān shēngchǎn qíngkuàng cháxún
+	订单生产跟进数据 - Dữ liệu theo dõi sản xuất đơn hàng	--Dìngdān shēngchǎn gēnjìn shùjù
+	在线库存统计(WIP) - Thống kê hàng đang sản xuất (WIP)	--Zàixiàn kùcún tǒngjì (WIP)
+	等待生产卡查询 - Truy vấn thẻ chờ sản xuất	--Děngdài shēngchǎn kǎ cháxún
+	订单生产查询 - Truy vấn sản xuất đơn hàng	--Dìngdān shēngchǎn cháxún
+	工序产量查询 - Truy vấn sản lượng công đoạn	--Gōngxù chǎnliàng cháxún
+	月WIP快照 - Ảnh chụp nhanh WIP hàng tháng	--Yuè WIP kuàizhào
++	采购类查询 - Truy vấn thu mua	--Cǎigòu lèi cháxún
+	染化料助剂查询 - Truy vấn thuốc nhuộm, hóa chất và chất trợ	--Rǎnhuàliào zhùjì cháxún
+	采购汇总查询 - Truy vấn tổng hợp thu mua	--Cǎigòu huìzǒng cháxún
++	技术类查询 - Truy vấn kỹ thuật	--Jìshù lèi cháxún
+	打样申请查询 (LD/SO) - Truy vấn đơn yêu cầu làm mẫu (LD/SO)	--Dǎyàng shēnqǐng cháxún (LD/SO)
+	订单工艺配方用量查询 - Truy vấn lượng sử dụng đơn pha chế công nghệ đơn hàng	--Dìngdān gōngyì pèifāng yòngliàng cháxún
+	配方用量查询(订单) - Truy vấn lượng sử dụng đơn pha chế (theo đơn hàng)	--Pèifāng yòngliàng cháxún (dìngdān)
+	配方用量查询(投坯订单) - Truy vấn lượng sử dụng đơn pha chế (đơn hàng đưa vải mộc vào sản xuất)	--Pèifāng yòngliàng cháxún (tóu pī dìngdān)
+	订单工艺路线查询 - Truy vấn lộ trình công nghệ đơn hàng	--Dìngdān gōngyì lùxiàn cháxún
+	订单工艺路线查询(漂炼车间) - Truy vấn lộ trình công nghệ đơn hàng (xưởng tẩy luyện)	--Dìngdān gōngyì lùxiàn cháxún (piǎoliàn chējiān)
+	订单工艺路线查询(染色车间) - Truy vấn lộ trình công nghệ đơn hàng (xưởng nhuộm)	--Dìngdān gōngyì lùxiàn cháxún (rǎnsè chējiān)
+	订单工艺路线查询(印花车间) - Truy vấn lộ trình công nghệ đơn hàng (xưởng in hoa)	--Dìngdān gōngyì lùxiàn cháxún (yìnhuā chējiān)
+	订单工艺路线查询(缸染车间) - Truy vấn lộ trình công nghệ đơn hàng (xưởng nhuộm máy/nhuộm缸)	--Dìngdān gōngyì lùxiàn cháxún (gāngrǎn chējiān)
+	订单工艺路线查询(整理车间) - Truy vấn lộ trình công nghệ đơn hàng (xưởng định hình/hoàn tất)	--Dìngdān gōngyì lùxiàn cháxún (zhěnglǐ chējiān)
+	订单工艺路线查询(业务部) - Truy vấn lộ trình công nghệ đơn hàng (phòng kinh doanh)	--Dìngdān gōngyì lùxiàn cháxún (yèwù bù)
+	中样配方查询 - Truy vấn đơn pha chế mẫu cỡ trung	--Zhòng yàng pèifāng cháxún
+	处方查询 - Truy vấn công thức đơn pha chế	--Chǔfāng cháxún
++	计划类查询 - Truy vấn kế hoạch	--Jìhuà lèi cháxún
+	车间计划完成情况查询 - Truy vấn tình hình hoàn thành kế hoạch tại xưởng	--Chējiān jìhuà wánchéng qíngkuàng cháxún
+	生产计划汇总查询 - Truy vấn tổng hợp kế hoạch sản xuất	--Shēngchǎn jìhuà huìzǒng cháxún
+	计划达成率 - Tỷ lệ đạt kế hoạch	--Jìhuà dáchénglǜ
+	计划准确率 - Tỷ lệ chính xác của kế hoạch	--Jìhuà zhǔnquèlǜ
+	漂炼车间计划查询 - Truy vấn kế hoạch xưởng tẩy luyện	--Piǎoliàn chējiān jìhuà cháxún
+	缸染车间排机计划看板 - Bảng quản lý kế hoạch xếp máy xưởng nhuộm máy	--Gāngrǎn chējiān pái jī jìhuà kànbǎn
+	缸染车间计划查询 - Truy vấn kế hoạch xưởng nhuộm máy	--Gāngrǎn chējiān jìhuà cháxún
+	染色车间计划查询 - Truy vấn kế hoạch xưởng nhuộm	--Rǎnsè chējiān jìhuà cháxún
+	印花车间计划查询 - Truy vấn kế hoạch xưởng in hoa	--Yìnhuā chējiān jìhuà cháxún
+	整理车间计划查询 - Truy vấn kế hoạch xưởng định hình/hoàn tất	--Zhěnglǐ chējiān jìhuà cháxún
+	订单交付跟踪表 - Bảng theo dõi giao hàng đơn hàng	--Dìngdān jiāofù gēnzōngbiǎo
+	订单报工查询 - Truy vấn báo cáo công đoạn đơn hàng	--Dìngdān bàogōng cháxún
++	质量类查询 - Truy vấn chất lượng	--Zhìliàng lèi cháxún
+	坯布/成品布物测查询 - Truy vấn đo lường vật lý vải mộc/vải thành phẩm	--Pībù/chéngpǐn bù wù cè cháxún
+	物测情况分析图表-经向断裂 - Biểu đồ phân tích tình hình đo lường - đứt sợi dọc	--Wù cè qíngkuàng fēnxī túbiǎo-jīng xiàng duànliè
+	物测情况分析图表-经向撕破 - Biểu đồ phân tích tình hình đo lường - rách sợi dọc	--Wù cè qíngkuàng fēnxī túbiǎo-jīng xiàng sīpò
+	物测情况分析图表-纬向断裂 - Biểu đồ phân tích tình hình đo lường - đứt sợi ngang	--Wù cè qíngkuàng fēnxī túbiǎo-wěi xiàng duànliè
+	物测情况分析图表-纬向撕破 - Biểu đồ phân tích tình hình đo lường - rách sợi ngang	--Wù cè qíngkuàng fēnxī túbiǎo-wěi xiàng sīpò
+	疵点查询 - Truy vấn lỗi vải	--Cìdiǎn cháxún
+	成品疵布分析 - Phân tích vải lỗi thành phẩm	--Chéngpǐn cìbù fēnxī
+	品质质量异常分析 - Phân tích bất thường về phẩm chất chất lượng	--Pǐnzhì zhìliàng yìcháng fēnxī
+	成品合格率 - Tỷ lệ đạt chuẩn thành phẩm	--Chéngpǐn hégélǜ
+	样品标签 - Nhãn hàng mẫu	--Yàngpǐn biāoqiàn
+	样品标签查询 - Truy vấn nhãn hàng mẫu	--Yàngpǐn biāoqiàn cháxún
+	成品验布查询 - Truy vấn kiểm vải thành phẩm	--Chéngpǐn yàn bù cháxún
+	在制品盘点结果 - Kết quả kiểm kê hàng đang sản xuất (WIP)	--Zàizhìpǐn pándiǎn jiéguǒ
+	订单要货数/A等/B等 - Số lượng đặt hàng/Loại A/Loại B	--Dìngdān yào huò shù/A děng/B děng
+	订单解锁/接收 - Mở khóa/Tiếp nhận đơn hàng	--Dìngdān jiěsuǒ/jiēshòu
+	订单后报 - Báo cáo sau đơn hàng	--Dìngdān hòubào
+	订单评审查询(管理) - Truy vấn đánh giá đơn hàng (Quản lý)	--Dìngdān píngshěn cháxún (guǎnlǐ)
+	订单坯布交期修改 - Sửa đổi thời hạn giao vải mộc của đơn hàng	--Dìngdān pībù jiāo qī xiūgǎi
+	销售跟单查询(PMC) - Truy vấn theo dõi đơn hàng kinh doanh (PMC)	--Xiāoshòu gēndān cháxún (PMC)
+	下发查询 - Truy vấn ban hành/giao việc	--Xiàfā cháxún
+	下发查询(仓库) - Truy vấn ban hành/giao việc (Kho)	--Xiàfā cháxún (cāngkù)
+	电子审批记录查询 - Truy vấn hồ sơ phê duyệt điện tử	--Diànzǐ shěnpī jìlù cháxún
+	车间蒸汽天然气单耗 - Định mức tiêu hao hơi nước và khí đốt tại xưởng	--Chējiān zhēngqì tiānránqì dānhào
+	机台单耗查询(蒸汽、天然气) - Truy vấn định mức tiêu hao theo máy (Hơi nước, khí đốt)	--Jītái dānhào cháxún (zhēngqì, tiānránqì)
+	订单工序单耗查询(蒸汽、天然气) - Truy vấn định mức tiêu hao theo công đoạn đơn hàng (Hơi nước, khí đốt)	--Dìngdān gōngxù dānhào cháxún (zhēngqì, tiānránqì)
+++	發 能源报表 - Báo cáo năng lượng	--Néngyuán bàobiǎo
+	仪表安装信息-Thông tin lắp đặt thiết bị	--Yíbiǎo ānzhuāng xìnxī
+	仪表耗用查询-Yêu cầu tiêu thụ thiết bị	--Yíbiǎo hàoyòng cháxún
+	仪表耗用查询(新)-Yêu cầu tiêu thụ thiết bị (Mới)	--Yíbiǎo hàoyòng cháxún (xīn)
+	仪表蒸汽日耗查询-Yêu cầu tiêu thụ hơi nước hàng ngày	--Yíbiǎo zhēngqì rì hào cháxún
+	异常仪表数据-Dữ liệu thiết bị bất thường	--Yìcháng yíbiǎo shùjù
+	仪表当前读数汇总表-Bảng tóm tắt các chỉ số thiết bị hiện tại	--Yíbiǎo dāngqián dúshù huìzǒngbiǎo
+	各仪表班组耗用金额查询-Yêu cầu lượng tiêu thụ cho mỗi nhóm thiết bị	--Gè yíbiǎo bānzǔ hàoyòng jīn'é cháxún
+	日机台小时耗用查询-Yêu cầu tiêu thụ giờ máy hàng ngày	--Rì jītái xiǎoshí hàoyòng cháxún
+	日班组产量能源耗用查询-Yêu cầu tiêu thụ năng lượng đầu ra của nhóm hàng ngày	--Rì bānzǔ chǎnliàng néngyuán hàoyòng cháxún
+	月机台班组产能报表-Báo cáo công suất nhóm máy hàng tháng	--Yuè jītái bānzǔ chǎnnéng bàobiǎo
+	机台产量能耗纵向比对-So sánh theo chiều dọc mức tiêu thụ năng lượng đầu ra của máy	--Jītái chǎnliàng nénghào zòngxiàng bǐduì
+	机台当班信息查询-Yêu cầu thông tin ca máy	--Jītái dāngbān xìnxī cháxún
+	机台耗用查询-Yêu cầu tiêu thụ máy	--Jītái hàoyòng cháxún
+	每日采集读数-Các chỉ số thu thập dữ liệu hàng ngày	--Měirì cǎijí dúshù
+	流程卡成本能耗分析-Phân tích chi phí tiêu thụ năng lượng thẻ quy trình	--Liúchéngkǎ chéngběn nénghào fēnxī
+	班组产量能耗-Tiêu thụ năng lượng đầu ra của nhóm	--Bānzǔ chǎnliàng nénghào
+	综合能耗分析-Phân tích tiêu thụ năng lượng toàn diện	--Zōnghé nénghào fēnxī
+	能源产量查询-Yêu cầu sản lượng năng lượng	--Néngyuán chǎnliàng cháxún
+	能源月报表-Báo cáo năng lượng hàng tháng	--Néngyuán yuè bàobiǎo
+	订单产量能耗查询-Yêu cầu tiêu thụ năng lượng đầu ra theo đơn đặt hàng	--Dìngdān chǎnliàng nénghào cháxún
+	设备班组产能耗用对比-So sánh mức tiêu thụ công suất nhóm thiết bị	--Shèbèi bānzǔ chǎnnéng hàoyòng duìbǐ
+	设备能耗用量查询-Yêu cầu tiêu thụ năng lượng thiết bị	--Shèbèi nénghào yòngliàng cháxún
+	仪表安装信息 - Thông tin lắp đặt đồng hồ đo	--Yíbiǎo ānzhuāng xìnxī
+	仪表耗用查询 - Truy vấn tiêu hao đồng hồ đo	--Yíbiǎo hàoyòng cháxún
+	仪表耗用查询(新) - Truy vấn tiêu hao đồng hồ đo (Mới)	--Yíbiǎo hàoyòng cháxún (xīn)
+	仪表蒸汽日耗查询 - Truy vấn lượng tiêu hao hơi nước hàng ngày theo đồng hồ	--Yíbiǎo zhēngqì rì hào cháxún
+	异常仪表数据 - Dữ liệu đồng hồ đo bất thường	--Yìcháng yíbiǎo shùjù
+	仪表当前读数汇总表 - Bảng tổng hợp số đọc hiện tại của đồng hồ đo	--Yíbiǎo dāngqián dúshù huìzǒngbiǎo
+	各仪表班组耗用金额查询 - Truy vấn số tiền tiêu hao theo tổ nhóm của từng đồng hồ	--Gè yíbiǎo bānzǔ hàoyòng jīn'é cháxún
+	日机台小时耗用查询 - Truy vấn tiêu hao theo giờ của máy trong ngày	--Rì jītái xiǎoshí hàoyòng cháxún
+	日班组产量能源耗用查询 - Truy vấn tiêu hao năng lượng và sản lượng theo tổ nhóm hàng ngày	--Rì bānzǔ chǎnliàng néngyuán hàoyòng cháxún
+	月机台班组产能报表 - Báo cáo năng suất theo tổ nhóm máy hàng tháng	--Yuè jītái bānzǔ chǎnnéng bàobiǎo
+	机台产量能耗纵向比对 - Đối chiếu dọc giữa sản lượng và năng lượng tiêu hao của máy	--Jītái chǎnliàng nénghào zòngxiàng bǐduì
+	机台当班信息查询 - Truy vấn thông tin ca trực của máy	--Jītái dāngbān xìnxī cháxún
+	机台耗用查询 - Truy vấn tiêu hao của máy	--Jītái hàoyòng cháxún
+	每日采集读数 - Số đọc thu thập hàng ngày	--Měirì cǎijí dúshù
+	流程卡成本能耗分析 - Phân tích năng lượng tiêu hao và chi phí theo thẻ quy trình	--Liúchéngkǎ chéngběn nénghào fēnxī
+	班组产量能耗 - Năng lượng tiêu hao và sản lượng của tổ nhóm	--Bānzǔ chǎnliàng nénghào
+	综合能耗分析 - Phân tích tiêu hao năng lượng tổng hợp	--Zōnghé nénghào fēnxī
+	能源产量查询 - Truy vấn sản lượng năng lượng	--Néngyuán chǎnliàng cháxún
+	能源月报表 - Báo cáo năng lượng hàng tháng	--Néngyuán yuè bàobiǎo
+	订单产量能耗查询 - Truy vấn tiêu hao năng lượng và sản lượng theo đơn hàng	--Dìngdān chǎnliàng nénghào cháxún
+	设备班组产能耗用对比 - So sánh tiêu hao năng suất theo tổ nhóm thiết bị	--Shèbèi bānzǔ chǎnnéng hàoyòng duìbǐ
+	设备能耗用量查询 - Truy vấn lượng tiêu hao năng lượng thiết bị	--Shèbèi nénghào yòngliàng cháxún
+    </textarea>
+    <button onclick="renderERP()">CẬP NHẬT & LƯU MENU ◈</button>
 </div>
 
 <div class="output-panel">
     <div class="search-container">
-        <input type="text" id="menuSearch" placeholder="🔍 Tìm kiếm menu chi tiết..." onkeyup="searchMenu()">
+        <input type="text" id="menuSearch" placeholder="🔍 Nhập từ khóa để tìm kiếm và tự động bung menu..." onkeyup="searchMenu()">
     </div>
     <div class="menu-wrapper" id="menuResult">
-        <p style="color: #999; text-align: center; margin-top: 50px;">Dán dữ liệu và nhấn cập nhật.</p>
-    </div>
+        </div>
 </div>
 
 <script>
-    let originalData = []; // Lưu trữ dữ liệu gốc để render lại khi cần
+    // 1. TỰ ĐỘNG CHẠY KHI MỞ FILE
+    window.onload = function() {
+        // Kiểm tra xem trình duyệt có lưu dữ liệu cũ không
+        const savedData = localStorage.getItem('erp_dung_tech_data');
+        if (savedData) {
+            document.getElementById('rawInput').value = savedData;
+        }
+        renderERP(); // Tự động dựng menu
+    };
 
     function renderERP() {
         const text = document.getElementById('rawInput').value;
         const container = document.getElementById('menuResult');
+        
+        // 2. LƯU VÀO BỘ NHỚ TRÌNH DUYỆT (Để không bị mất khi F5)
+        localStorage.setItem('erp_dung_tech_data', text);
+        
         container.innerHTML = "";
         if (!text.trim()) return;
 
@@ -93,7 +885,6 @@
                 else tree.push(node);
             }
         });
-        originalData = tree;
         draw(tree, container, true);
     }
 
@@ -109,7 +900,7 @@
             
             let toggleSection = hasChildren 
                 ? `<span class="toggle-box"><span class="toggle-txt">+</span></span>`
-                : `<span style="width:20px; margin-right:12px; display:inline-block;"></span>`;
+                : `<span style="width:18px; margin-right:12px; display:inline-block;"></span>`;
             
             row.innerHTML = `${toggleSection}<span class="icon-diamond">◈</span><span class="txt-label">${node.title}</span>`;
             li.appendChild(row);
@@ -135,18 +926,17 @@
     function searchMenu() {
         const keyword = document.getElementById('menuSearch').value.toLowerCase().trim();
         const allLi = document.querySelectorAll('#menuResult li');
-        const allSubUl = document.querySelectorAll('#menuResult ul:not(.root-ul)');
         const allRows = document.querySelectorAll('.menu-row');
 
-        // Reset
+        // Reset trạng thái cũ
         allRows.forEach(row => {
             row.classList.remove('row-active');
             const label = row.querySelector('.txt-label');
-            label.innerHTML = label.textContent; // Xóa thẻ mark cũ
+            label.innerHTML = label.textContent; 
         });
 
         if (keyword === "") {
-            allSubUl.forEach(ul => ul.classList.add('hidden'));
+            document.querySelectorAll('#menuResult ul:not(.root-ul)').forEach(ul => ul.classList.add('hidden'));
             document.querySelectorAll('.toggle-txt').forEach(t => t.textContent = '+');
             return;
         }
@@ -157,25 +947,21 @@
             const row = li.querySelector('.menu-row');
 
             if (originalText.toLowerCase().includes(keyword)) {
-                // 1. Bôi sáng chữ
+                // Bôi sáng từ khóa
                 const regex = new RegExp(`(${keyword})`, 'gi');
                 labelSpan.innerHTML = originalText.replace(regex, '<mark>$1</mark>');
-                
-                // 2. Bôi sáng cả dòng
                 row.classList.add('row-active');
 
-                // 3. Tự động bung các cấp cha
-                let p = li.parentElement; // ul chứa li này
+                // Bung các cấp cha
+                let p = li.parentElement; 
                 while (p && p.id !== 'menuResult') {
-                    p.classList.remove('hidden'); // Mở thư mục
-                    
-                    // Cập nhật dấu + thành - cho thẻ cha tương ứng
+                    p.classList.remove('hidden');
                     const parentRow = p.parentElement.querySelector('.menu-row');
                     if (parentRow) {
                         const txt = parentRow.querySelector('.toggle-txt');
                         if (txt) txt.textContent = '-';
                     }
-                    p = p.parentElement.parentElement; // Nhảy lên ul cấp trên
+                    p = p.parentElement.parentElement;
                 }
             }
         });
