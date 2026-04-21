@@ -925,58 +925,78 @@
 function searchMenu(event) {
     const keyword = document.getElementById('menuSearch').value.toLowerCase().trim();
     const allLi = document.querySelectorAll('#menuResult li');
-    const allSubUls = document.querySelectorAll('#menuResult ul:not(.root-ul)');
     const allRows = document.querySelectorAll('.menu-row');
+    const allSubUls = document.querySelectorAll('#menuResult ul:not(.root-ul)');
 
-    // 1. Nếu là phím Enter thì thực hiện nhảy đến mục tiếp theo
+    // 1. Xử lý Enter nhảy kết quả
     if (event && event.key === "Enter") {
         const activeResults = document.querySelectorAll('.row-active');
         if (activeResults.length > 0) {
             currentSearchIndex++;
-            if (currentSearchIndex >= activeResults.length) currentSearchIndex = 0; // Quay lại mục đầu tiên
-            
+            if (currentSearchIndex >= activeResults.length) currentSearchIndex = 0;
             activeResults[currentSearchIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-            // Hiệu ứng nháy nhẹ để biết đang đứng ở đâu
             activeResults.forEach(r => r.style.outline = "none");
             activeResults[currentSearchIndex].style.outline = "2px dashed #e67e22";
         }
         return;
     }
 
-    // 2. Nếu gõ phím bình thường: Reset và tìm kiếm mới
-    currentSearchIndex = -1; 
+    // 2. RESET TRẠNG THÁI
+    currentSearchIndex = -1;
     allRows.forEach(row => {
         row.classList.remove('row-active');
         row.style.outline = "none";
         const span = row.querySelector('span:last-child');
         span.innerHTML = span.textContent;
+        
+        // Mặc định ẩn toàn bộ các dòng
+        row.parentElement.classList.add('hidden');
     });
+    allSubUls.forEach(ul => ul.classList.add('hidden'));
 
+    // 3. NẾU TRỐNG: Hiện toàn bộ Cấp 1 & Cấp 2 (ở trạng thái đóng)
     if (!keyword) {
-        allSubUls.forEach(ul => ul.classList.add('hidden'));
-        document.querySelectorAll('.toggle-box').forEach(b => b.textContent = '+');
+        allRows.forEach(row => {
+            if (row.classList.contains('lvl-1') || row.classList.contains('lvl-2')) {
+                row.parentElement.classList.remove('hidden');
+            }
+            const btn = row.querySelector('.toggle-box');
+            if (btn) btn.textContent = '+';
+        });
         return;
     }
 
-    // 3. Xử lý bung menu và bôi sáng
+    // 4. LOGIC LỌC CHI TIẾT
     allLi.forEach(li => {
         const row = li.querySelector('.menu-row');
         const span = row.querySelector('span:last-child');
         const text = span.textContent;
 
         if (text.toLowerCase().includes(keyword)) {
+            // Highlight mục tìm thấy
             span.innerHTML = text.replace(new RegExp(`(${keyword})`, 'gi'), '<mark>$1</mark>');
             row.classList.add('row-active');
+            
+            // HIỆN CHÍNH NÓ
+            li.classList.remove('hidden');
 
-            let p = li.parentElement;
+            // LỘI NGƯỢC LÊN CHA
+            let p = li.parentElement; 
             while (p && p.id !== 'menuResult') {
                 if (p.tagName === 'UL') {
-                    p.classList.remove('hidden');
-                    const parentRow = p.previousElementSibling; 
-                    if (parentRow && parentRow.classList.contains('menu-row')) {
+                    p.classList.remove('hidden'); // Mở danh sách chứa nó
+                    
+                    const parentRow = p.previousElementSibling;
+                    if (parentRow) {
+                        parentRow.parentElement.classList.remove('hidden'); // Hiện dòng cha
                         const btn = parentRow.querySelector('.toggle-box');
                         if (btn) btn.textContent = '-';
+                        
+                        // HIỆN CÁC MỤC ANH EM CÙNG CẤP (Nhưng không mở con của chúng)
+                        const siblings = parentRow.parentElement.parentElement.children;
+                        for (let sib of siblings) {
+                            if (sib.tagName === 'LI') sib.classList.remove('hidden');
+                        }
                     }
                 }
                 p = p.parentElement;
@@ -984,7 +1004,10 @@ function searchMenu(event) {
         }
     });
 
-    // Tự động nhảy đến mục đầu tiên ngay khi gõ xong
+    // Luôn hiển thị tất cả các mục Cấp 1 để làm mục lục nền
+    document.querySelectorAll('.lvl-1').forEach(r => r.parentElement.classList.remove('hidden'));
+
+    // Cuộn đến mục đầu tiên
     const firstResult = document.querySelector('.row-active');
     if (firstResult) {
         firstResult.scrollIntoView({ behavior: 'smooth', block: 'center' });
